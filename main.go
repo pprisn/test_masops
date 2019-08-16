@@ -69,6 +69,6 @@ func main() {
 		fmt.Println(os.Stderr, "reading standard input:", err)
 	}
 	t1 := time.Now()
-	log.Printf("Время выполнения сканирования %v сек.\n", t1.Sub(t0))
+	log.Printf("СТОП. Время выполнения %v сек.\n", t1.Sub(t0))
 
 }
