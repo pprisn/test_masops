@@ -60,7 +60,7 @@ func main() {
 				break
 			}
                 
-		log.Printf("%s\t%s \n", nameip, line)
+			log.Printf("%s\t%s", nameip, line)
 		}
 
 

@@ -46597,3 +46597,5 @@
 2019/08/16 14:46:04 R48-398041-N	}
  
 2019/08/16 14:46:04 R48-398041-N	EOF
+2019/08/16 22:46:11 СТАРТ 2019-08-16 22:46:11.6406642 +0300 MSK m=+0.004987101 
+2019/08/16 22:46:32 Error R48-398508-N	dial tcp 10.98.92.162:7502: connectex: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.
