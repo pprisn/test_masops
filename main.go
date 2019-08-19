@@ -15,6 +15,7 @@ import (
 )
 
 var fsrc = flag.String("fsrc", "fsrc.txt", `Файл с данными адресов для мониторинга отклика работы службы МАСОПС`)
+var mode = flag.String("mode", "l", `Режим логирования отклика службы, l краткий, f полный`)
 
 func main() {
 
@@ -61,6 +62,13 @@ func main() {
 			}
                 
 			log.Printf("%s\t%s", nameip, line)
+			if *mode =="l" {
+                        	break //Читаем 1ну успешную строку
+			} else if *mode=="f" {
+			  continue
+			}
+
+
 		}
 
 
