@@ -19,7 +19,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
-var fsrc = flag.String("fsrc", "fsrc.txt", `Файл с данными адресов для мониторинга отклика работы службы МАСОПС`)
+var fsrc = flag.String("fsrc", "./fsrc.txt", `Файл с данными адресов для мониторинга отклика работы службы МАСОПС`)
 var mode = flag.String("mode", "l", `Режим логирования отклика службы, l краткий, f полный`)
 
 type Nsi struct {
@@ -31,10 +31,11 @@ type Nsi struct {
 func main() {
 
 	//	var err error
-        loging := os.Getenv("LOGBD")
+	loging := os.Getenv("LOGDB")
+	fmt.Printf("LOGDB=%s\n", loging)
+	//	return
 	//db, err := gorm.Open("sqlite3", "masops.db?cache=shared&mode=rwc")
-	db, err := gorm.Open("mysql",loging+"@/masops?charset=utf8&parseTime=True&loc=Local")
-	//        db.SetMaxOpenConns(1)
+	db, err := gorm.Open("mysql", loging+"@(localhost)/masops?charset=utf8&parseTime=True&loc=Local")
 	defer db.Close()
 
 	db.AutoMigrate(&Nsi{})
@@ -52,12 +53,13 @@ func main() {
 	log.Printf("СТАРТ %v \n", t0)
 
 	if f, err = os.Open(*fsrc); err != nil {
+		log.Printf("Error open %s \n", *fsrc)
 		panic(err)
 	}
 	defer f.Close()
 
 	err = check_nsi(db, f)
-
+	return
 	scanner := bufio.NewScanner(f)
 	var nameip string
 	d := net.Dialer{Timeout: time.Second * 4}
@@ -102,19 +104,10 @@ func main() {
 				if err == io.EOF {
 					break
 				}
-                                 break
+				break
 				//return err
 			}
 			line = strings.TrimSuffix(line, "\n")
-
-//			if err != nil {
-//				if err == io.EOF {
-//					break
-//				} else {
-//					fmt.Println(err)
-//					continue
-//				}
-//			}
 
 			if strings.Contains(line, `"version":`) {
 				version = line[:len(line)-1]
@@ -124,20 +117,10 @@ func main() {
 
 			n := Nsi{}
 			n.Name = nameip
-			//                        db.First(&n,"name = ?",nameip)
-
 			if *mode == "l" {
 				log.Printf("%s\t%s\t%s\n", nameip, status, version)
 				n.Status = fmt.Sprintf("\t%s\t%s", status, version)
-				//db.Create(&n)
-				//db.Save(&n)
 				db.Model(&n).Where("name = ?", nameip).Update("status", n.Status)
-				//				ErrNew = db.NewRecord(j)
-				//				if ErrNew == true {
-				//					continue
-				//				} else {
-				//					db.Create(&j)
-				//				}
 			}
 
 			if *mode == "f" {
@@ -158,22 +141,28 @@ func main() {
 func check_nsi(db *gorm.DB, f *os.File) error {
 	scanner := bufio.NewScanner(f)
 	var nameip string
-	var status string = ""
-	var ErrNew bool
+	var status string = "NewRecord"
 	n := Nsi{}
-	//	var ErrNew bool = false
+	log.Println("func check_nsi")
 	for scanner.Scan() {
 		nameip = strings.TrimSpace(fmt.Sprintf("%s", scanner.Text()))
-
+		log.Printf("scanner %s\n", nameip)
 		// Наполним справочник данными из входящего файла
-		n = Nsi{Name: nameip, Status: status}
-//		db.Create(&n)
-		ErrNew = db.NewRecord(n) // => returns `true` as primary key is blank
-	//		//fmt.Printf("%v \n",ErrNew)
-		if ErrNew == true {
-			continue
+		n = Nsi{}
+		newNsi := &Nsi{
+			Name:   nameip,
+			Status: status,
+		}
+		if err := db.Where("name = ?", nameip).First(&n).Error; err != nil {
+			// error handling...
+			if gorm.IsRecordNotFoundError(err) {
+				db.Create(newNsi) // newNsi not nsi
+				log.Printf("NewRecord %s\n", nameip)
+			}
 		} else {
-			db.Create(&n)
+			//db.Model(&n).Where("id = ?", nameip).Update("status", "newrecord")
+			// Запись найдена в БД, переходим к следующему циклу
+			continue
 		}
 
 	}
