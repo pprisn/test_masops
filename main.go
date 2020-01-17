@@ -59,7 +59,7 @@ func main() {
 	defer f.Close()
 
 	err = check_nsi(db, f)
-	return
+	//return
 	scanner := bufio.NewScanner(f)
 	var nameip string
 	d := net.Dialer{Timeout: time.Second * 4}
@@ -71,13 +71,7 @@ func main() {
 	var name string
 	var version string
 	var status string
-	//	var ErrNew bool = false
 
-	//	var Notfound bool
-	//	var currentId uint
-	// цикл по списку адресов ПК-ip
-
-	//        var result map[string]interface{}
 	var i int = 0
 	for rows.Next() {
 		i = i + 1
