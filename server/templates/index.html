@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Nsis</title>
+        <link rel="stylesheet" type="text/css" href="static/css/style.css"> 
+ 
+        <!--https://datatables.net
+        <link rel="stylesheet" href="http://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css">
+        <script src="https://code.jquery.com/jquery-1.11.3.js"></script>
+        <script src="http://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+        -->
+        <!-- Full local -->
+        <link rel="stylesheet" type="text/css" href="static/DataTables/datatables.min.css"/>
+        <script type="text/javascript" src="static/DataTables/datatables.min.js"></script>
+
+ <!-- Локатьное подключение DataTables без пагинации -->
+<!--
+<link rel="stylesheet" type="text/css" href="static/DataTables/datatables.min.css"/>
+<script type="text/javascript" src="static/DataTables/datatables.min.js"></script>
+-->
+<!--
+<link rel="stylesheet" type="text/css" href="static/DataTables/DataTables-1.10.20/css/jquery.dataTables.css"/>
+<script type="text/javascript" src="static/DataTables/DataTables-1.10.20/js/jquery.dataTables.js"></script>
+-->
+<!--
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.20/af-2.3.4/datatables.min.css"/>
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.20/af-2.3.4/datatables.min.js"></script>
+-->    
+    
+    </head>
+    <body>
+        <h2>Мониторинг версий ПО МАС ОПС УФПС Липецкой обл.</h2>
+        <p><a href="/create">Добавить</a></p>
+        <table id="myTable" class="cell-border compact stripe responsive">
+            <thead><th>Id</th><th>Время обновления</th><th>IP/имя ПК</th><th>Статус проверки</th><th></th><th></th></thead>
+            {{range . }}
+            <tr>
+                <td>{{.ID}}</td>
+                <td>{{.UpdatedAt}}</td>
+                <td>{{.Name}}</td>
+                <td>{{.Status}}</td>
+                <td><a href="/edit/{{.ID}}">Редакт.</a>
+                <td><a href="/delet/{{.ID}}">Удалить</a>
+                </td>
+            </tr>
+            {{end}}
+        </table>
+    </body>
+<script>
+$(document).ready(function() {
+        $('#myTable').DataTable({
+        
+        });
+});
+</script>
+</html>

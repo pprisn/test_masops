@@ -1,4 +1,4 @@
-//Программа мониторинга версий МАСОПС на сети УФПС Липецкой области
+//Программа сбора данных версий МАСОПС на сети УФПС Липецкой области
 //http://localhost:7502/v1/
 // Читаем отклик службы и результат сохраняем в БД
 package main
@@ -86,10 +86,9 @@ func main() {
 			continue
 		}
 		conn.SetReadDeadline(time.Now().Add(time.Second * 10))
-
 		fmt.Fprintf(conn, "GET /v1/ HTTP/1.0\r\n\r\n")
-		jsonStatus := bufio.NewReader(conn) //.ReadString('\n')
 
+		jsonStatus := bufio.NewReader(conn) //.ReadString('\n')
 		version = ""
 		status = ""
 		for {
@@ -108,27 +107,30 @@ func main() {
 			} else if strings.Contains(line, `"status"`) {
 				status = line[:len(line)-1]
 			}
-
-			n := Nsi{}
-			n.Name = nameip
-			if *mode == "l" {
-				log.Printf("%s\t%s\t%s\n", nameip, status, version)
-				n.Status = fmt.Sprintf("\t%s\t%s", status, version)
-				db.Model(&n).Where("name = ?", nameip).Update("status", n.Status)
+			if len(version) > 0 && len(status) > 0 {
+				break
 			}
-
-			if *mode == "f" {
-				///
-			}
-
+		} //
+		n := Nsi{}
+		n.Name = nameip
+		if *mode == "l" {
+			log.Printf("%s\t%s\t%s\n", nameip, status, version)
+			n.Status = fmt.Sprintf("\t%s\t%s", status, version)
+			db.Model(&n).Where("name = ?", nameip).Update("status", n.Status)
 		}
 
-		if err := scanner.Err(); err != nil {
-			fmt.Println(os.Stderr, "reading standard input:", err)
+		if *mode == "f" {
+			// TO DO FOR Full mode
 		}
-		t1 := time.Now()
-		log.Printf("СТОП. Время выполнения %v сек.\n", t1.Sub(t0))
+
 	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Println(os.Stderr, "reading standard input:", err)
+	}
+	t1 := time.Now()
+	log.Printf("СТОП. Время выполнения %v сек.\n", t1.Sub(t0))
+
 }
 
 //функция читает файл со списком адресов , добавляет новые в БД к имеющимся
