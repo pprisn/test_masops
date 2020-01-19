@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Edt Nsis</title>
+    </head>
+    <body>
+        <form method="POST">
+          <fieldset>
+            <legend>Редактирование строки примечание для статуса сервиса МАСОПС</legend>
+                 <input type="hidden" name="id" value="{{.ID}}" />
+                 <input type="hidden" name="CreatedAt" value="{{.CreatedAt}}" />
+                 <input type="hidden" name="UpdatedAt" value="{{.UpdatedAt}}" />
+                 <input type="hidden" name="DeletedAt" value="{{.DeletedAt}}" />
+                 <p><label for="name">Имя ПК/IP <em>*</em></label><input type="text" name="name"  value="{{.Name}}"> </p>
+                 <p><label for="status">Примечание</label><input type="text" name="status" value="{{.Status}}"> </p>
+          </fieldset>
+        <p><input type="submit" value="Отправить"></p>
+        </form>
+    </body>
+</html>

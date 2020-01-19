@@ -14,25 +14,11 @@
         <link rel="stylesheet" type="text/css" href="static/DataTables/datatables.min.css"/>
         <script type="text/javascript" src="static/DataTables/datatables.min.js"></script>
 
- <!-- Локатьное подключение DataTables без пагинации -->
-<!--
-<link rel="stylesheet" type="text/css" href="static/DataTables/datatables.min.css"/>
-<script type="text/javascript" src="static/DataTables/datatables.min.js"></script>
--->
-<!--
-<link rel="stylesheet" type="text/css" href="static/DataTables/DataTables-1.10.20/css/jquery.dataTables.css"/>
-<script type="text/javascript" src="static/DataTables/DataTables-1.10.20/js/jquery.dataTables.js"></script>
--->
-<!--
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.20/af-2.3.4/datatables.min.css"/>
-<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.20/af-2.3.4/datatables.min.js"></script>
--->    
-    
     </head>
     <body>
         <h2>Мониторинг версий ПО МАС ОПС УФПС Липецкой обл.</h2>
         <p><a href="/create">Добавить</a></p>
-        <table id="myTable" class="cell-border compact stripe responsive">
+        <table id="myTable" class="cell-border compact stripe responsive buttons">
             <thead><th>Id</th><th>Время обновления</th><th>IP/имя ПК</th><th>Статус проверки</th><th></th><th></th></thead>
             {{range . }}
             <tr>
@@ -48,10 +34,96 @@
         </table>
     </body>
 <script>
+
 $(document).ready(function() {
-        $('#myTable').DataTable({
-        
-        });
-});
+  var table = $('#myTable').DataTable({
+        "language": {
+            "url": "static/DataTables/Russian.json"
+        },
+          "lengthMenu":[[10, 25, 50, -1], [10, 25, 50, "All"]],
+  // "dom": 'Blfrtip', // только пагинация
+  // "dom": '<"top"i>rt<"bottom"flp><"clear">',
+    dom: 'B<"clear">lfrtip', // all buttons
+  // "dom": '<lf<t>ip>',
+   keys: {
+        columns: ':not(:last-child)'
+    },
+    buttons: true,
+
+// Пример замены в тблице поля на ссылку          
+//"columnDefs": [ { //Вместо 0 столбца ID отображать ссылку Download
+//    "targets": 0,
+//    "data": "download_link",
+//    "render": function ( data, type, row, meta ) {
+//      return '<a href="'+data+'">Download</a>';
+//    }
+//  } ],
+
+// Переопределими buttons
+    buttons: [
+        {
+                extend: 'csv',
+                //Name the CSV
+//                filename: 'file_name',
+                text: 'Отчет CSV',
+                exportOptions: {
+                        columns: [0, 1 ,2, 3]
+                },
+                //Function which customize the CSV (input : csv is the object that you can preprocesss)
+                customize: function (csv) {
+                        //Split the csv to get the rows
+                        var split_csv = csv.split("\n");
+ 
+                        //Remove the row one to personnalize the headers
+                        split_csv[0] = '"ID","Time","IP","Статус"';
+ 
+                        //For each row except the first one (header)
+                        $.each(split_csv.slice(1), function (index, csv_row) {
+                                //Split on quotes and comma to get each cell
+                                var csv_cell_array = csv_row.split('","');
+                                 //Remove replace the two quotes which are left at the beginning and the end (first and last cell)
+                                csv_cell_array[0] = csv_cell_array[0].replace(/"/g, '');
+                                csv_cell_array[3] = csv_cell_array[3].replace(/"/g, '');
+ 
+                                //RANDOM EXAMPLE :insert 123 to 3th cell
+                                //csv_cell_array[3] = "123";
+ 
+                                //Join the table on the quotes and comma; add back the quotes at the beginning and end
+                                csv_cell_array_quotes = '"' + csv_cell_array.join('","') + '"';
+ 
+                                //Insert the new row into the rows array at the previous index (index +1 because the header was sliced)
+                                split_csv[index + 1] = csv_cell_array_quotes;
+                        });
+
+                        //Join the rows with line breck and return the final csv (datatables will take the returned csv and process it)
+                        csv = split_csv.join("\n");
+                        return csv;
+                }
+        },
+
+        {
+                extend: 'excel',
+                //Name the EXCEL
+                messageTop: 'Мониторинг версий ПО МАС ОПС УФПС Липецкой обл.',
+                filename: 'file_name',
+                text: 'Отчет EXCEL',
+                exportOptions: {
+                        columns: [0, 1 ,2, 3]
+                }
+        },
+        {
+                extend: 'pdf',
+                filename: 'file_name',
+                text: 'Отчет PDF',
+                messageTop: 'Мониторинг версий ПО МАС ОПС УФПС Липецкой обл.',
+                exportOptions: {
+                        columns: [0, 1, 2, 3]
+                }
+        }
+
+]
+  }); //DataTable
+});//document
+
 </script>
 </html>

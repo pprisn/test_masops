@@ -35,43 +35,48 @@ type Nsi struct {
 
 var database *sql.DB
 
-/*
 // возвращаем пользователю страницу для редактирования объекта
 func EditPage(w http.ResponseWriter, r *http.Request) {
-    vars := mux.Vars(r)
-    id := vars["id"]
+	vars := mux.Vars(r)
+	id := vars["id"]
+	row := database.QueryRow("select * from masops.nsis where id = ?", id)
+	nsi := Nsi{}
+	err := row.Scan(&nsi.ID, &nsi.CreatedAt, &nsi.UpdatedAt, &nsi.DeletedAt, &nsi.Name, &nsi.Status)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, http.StatusText(404), http.StatusNotFound)
+	} else {
+		tmpl, err := template.ParseFiles("templates/edit.html")
+		if err != nil {
+			log.Println(err)
 
-    row := database.QueryRow("select * from productdb.Products where id = ?", id)
-    prod := Product{}
-    err := row.Scan(&prod.Id, &prod.Model, &prod.Company, &prod.Price)
-    if err != nil{
-        log.Println(err)
-        http.Error(w, http.StatusText(404), http.StatusNotFound)
-    }else{
-        tmpl, _ := template.ParseFiles("templates/edit.html")
-        tmpl.Execute(w, prod)
-    }
+		}
+		err = tmpl.Execute(w, nsi)
+		if err != nil {
+			log.Println(err)
+		}
+
+	}
 }
+
 // получаем измененные данные и сохраняем их в БД
 func EditHandler(w http.ResponseWriter, r *http.Request) {
-    err := r.ParseForm()
-    if err != nil {
-        log.Println(err)
-    }
-    id := r.FormValue("id")
-    model := r.FormValue("model")
-    company := r.FormValue("company")
-    price := r.FormValue("price")
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+	}
+	id := r.FormValue("id")
+	status := r.FormValue("status")
 
-    _, err = database.Exec("update productdb.Products set model=?, company=?, price = ? where id = ?",
-        model, company, price, id)
+	_, err = database.Exec("update masops.nsis set status=? where id = ?", status, id)
 
-    if err != nil {
-        log.Println(err)
-    }
-    http.Redirect(w, r, "/", 301)
+	if err != nil {
+		log.Println(err)
+	}
+	http.Redirect(w, r, "/", 301)
 }
 
+/*
 func CreateHandler(w http.ResponseWriter, r *http.Request) {
     if r.Method == "POST" {
 
@@ -147,8 +152,8 @@ func main() {
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
 	//    http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	//    router.HandleFunc("/create", CreateHandler)
-	//    router.HandleFunc("/edit/{id:[0-9]+}", EditPage).Methods("GET")
-	//    router.HandleFunc("/edit/{id:[0-9]+}", EditHandler).Methods("POST")
+	router.HandleFunc("/edit/{id:[0-9]+}", EditPage).Methods("GET")
+	router.HandleFunc("/edit/{id:[0-9]+}", EditHandler).Methods("POST")
 
 	//    http.Handle("/",router)
 
