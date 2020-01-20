@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"flag"
 	"fmt"
@@ -10,6 +11,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -67,8 +70,8 @@ func EditHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	id := r.FormValue("id")
 	status := r.FormValue("status")
-
-	_, err = database.Exec("update masops.nsis set status=? where id = ?", status, id)
+	t := time.Now()
+	_, err = database.Exec("update masops.nsis set status=?, updated_at=? where id = ?", status, t, id)
 
 	if err != nil {
 		log.Println(err)
@@ -76,31 +79,27 @@ func EditHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", 301)
 }
 
-/*
 func CreateHandler(w http.ResponseWriter, r *http.Request) {
-    if r.Method == "POST" {
+	if r.Method == "POST" {
+		err := r.ParseForm()
+		if err != nil {
+			log.Println(err)
+		}
+		name := r.FormValue("name")
+		status := r.FormValue("status")
+		//t := time.Now()
 
-        err := r.ParseForm()
-        if err != nil {
-            log.Println(err)
-        }
-        model := r.FormValue("model")
-        company := r.FormValue("company")
-        price := r.FormValue("price")
+		_, err = database.Exec("insert into masops.nsis (name, created_at, updated_at, status) values (?, NOW(), NOW(), ?)",
+			name, status)
 
-        _, err = database.Exec("insert into productdb.Products (model, company, price) values (?, ?, ?)",
-          model, company, price)
-
-        if err != nil {
-            log.Println(err)
-        }
-        http.Redirect(w, r, "/", 301)
-    }else{
-        http.ServeFile(w,r, "templates/create.html")
-    }
+		if err != nil {
+			log.Println(err)
+		}
+		http.Redirect(w, r, "/", 301)
+	} else {
+		http.ServeFile(w, r, "templates/create.html")
+	}
 }
-
-*/
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -139,8 +138,7 @@ func main() {
 	flag.Parse()
 
 	loging := os.Getenv("LOGDB")
-	db, err := sql.Open("mysql", loging+"@tcp(localhost)/masops?charset=utf8&parseTime=True&loc=Local")
-
+	db, err := sql.Open("mysql", loging+"@tcp(127.0.0.1)/masops?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
 		log.Println(err)
 	}
@@ -151,7 +149,7 @@ func main() {
 	router.HandleFunc("/", IndexHandler)
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
 	//    http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-	//    router.HandleFunc("/create", CreateHandler)
+	router.HandleFunc("/create", CreateHandler)
 	router.HandleFunc("/edit/{id:[0-9]+}", EditPage).Methods("GET")
 	router.HandleFunc("/edit/{id:[0-9]+}", EditHandler).Methods("POST")
 
@@ -159,14 +157,35 @@ func main() {
 
 	srv := &http.Server{
 		Handler: router,
-		Addr:    "127.0.0.1:3000",
+		Addr:    ":3000",
 		// Good practice: enforce timeouts for servers you create!
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 60 * time.Second,
+		ReadTimeout:  60 * time.Second,
 	}
 
-	log.Fatal(srv.ListenAndServe())
+	//log.Fatal(srv.ListenAndServe())
 
-	//    fmt.Println("Server is listening...")
-	//    http.ListenAndServe(":3000", nil)
+	done := make(chan os.Signal, 1)
+	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+	log.Print("Server Started")
+
+	<-done
+	log.Print("Server Stopped")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer func() {
+		// extra handling here
+		cancel()
+	}()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("Server Shutdown Failed:%+v", err)
+	}
+	log.Print("Server Exited Properly")
 }

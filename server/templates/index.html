@@ -75,7 +75,7 @@ $(document).ready(function() {
                         var split_csv = csv.split("\n");
  
                         //Remove the row one to personnalize the headers
-                        split_csv[0] = '"ID","Time","IP","Статус"';
+                        split_csv[0] = '"ID";"Time";"IP";"Status"';
  
                         //For each row except the first one (header)
                         $.each(split_csv.slice(1), function (index, csv_row) {
@@ -84,13 +84,10 @@ $(document).ready(function() {
                                  //Remove replace the two quotes which are left at the beginning and the end (first and last cell)
                                 csv_cell_array[0] = csv_cell_array[0].replace(/"/g, '');
                                 csv_cell_array[3] = csv_cell_array[3].replace(/"/g, '');
- 
                                 //RANDOM EXAMPLE :insert 123 to 3th cell
                                 //csv_cell_array[3] = "123";
- 
                                 //Join the table on the quotes and comma; add back the quotes at the beginning and end
-                                csv_cell_array_quotes = '"' + csv_cell_array.join('","') + '"';
- 
+                                csv_cell_array_quotes = '"' + csv_cell_array.join('";"') + '"';
                                 //Insert the new row into the rows array at the previous index (index +1 because the header was sliced)
                                 split_csv[index + 1] = csv_cell_array_quotes;
                         });

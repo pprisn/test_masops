@@ -78,7 +78,7 @@ func main() {
 		rows.Scan(&name)
 		nameip = name
 		fmt.Printf("%d\t%s:7502\n", i, nameip)
-		conn, err := d.Dial("tcp", nameip+":7502")
+		conn, err := d.Dial("tcp", nameip+".main.russianpost.ru"+":7502")
 		if err != nil {
 			// handle error
 			log.Printf("\tError\t%s\t%s", nameip, err)
