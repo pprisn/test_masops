@@ -89,11 +89,15 @@ func CreateHandler(w http.ResponseWriter, r *http.Request) {
 		status := r.FormValue("status")
 		//t := time.Now()
 
-		_, err = database.Exec("insert into masops.nsis (name, created_at, updated_at, status) values (?, NOW(), NOW(), ?)",
+		result, err := database.Exec("insert into masops.nsis (name, created_at, updated_at, status) values (?, NOW(), NOW(), ?)",
 			name, status)
-
 		if err != nil {
 			log.Println(err)
+		} else {
+			ID_, err := result.LastInsertId()
+			if err == nil {
+				log.Printf("Insert ID=%d Name=%s, Status=%s\n", ID_, name, status)
+			}
 		}
 		http.Redirect(w, r, "/", 301)
 	} else {
