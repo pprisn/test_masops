@@ -135,6 +135,13 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func Middleware(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Print("middleware","\t",r.RemoteAddr,"\t",r.Method,"\t", r.URL)
+		h.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	var dir string
 
@@ -142,6 +149,10 @@ func main() {
 	flag.Parse()
 
 	loging := os.Getenv("LOGDB")
+        if loging == "" {
+		loging = "root"
+	}
+
 	db, err := sql.Open("mysql", loging+"@tcp(127.0.0.1)/masops?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
 		log.Println(err)
@@ -152,12 +163,11 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/", IndexHandler)
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
-	//    http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	router.HandleFunc("/create", CreateHandler)
 	router.HandleFunc("/edit/{id:[0-9]+}", EditPage).Methods("GET")
 	router.HandleFunc("/edit/{id:[0-9]+}", EditHandler).Methods("POST")
 
-	//    http.Handle("/",router)
+	router.Use(Middleware)
 
 	srv := &http.Server{
 		Handler: router,
