@@ -37,6 +37,7 @@ type Nsi struct {
 }
 
 var database *sql.DB
+var loging string
 
 // возвращаем пользователю страницу для редактирования объекта
 func EditPage(w http.ResponseWriter, r *http.Request) {
@@ -138,7 +139,17 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 func Middleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Print(r.RemoteAddr, "\t", r.Method, "\t", r.URL)
+
+		db, err := sql.Open("mysql", loging+"@tcp(127.0.0.1)/masops?charset=utf8&parseTime=True&loc=Local")
+
+		defer db.Close()
+		if err != nil {
+			log.Println(err)
+
+		}
+		database = db
 		h.ServeHTTP(w, r)
+
 	})
 }
 
@@ -148,17 +159,17 @@ func main() {
 	flag.StringVar(&dir, "dir", "./static/", "the directory to serve files from. Defaults to the current dir")
 	flag.Parse()
 
-	loging := os.Getenv("LOGDB")
+	loging = os.Getenv("LOGDB")
 	if loging == "" {
 		loging = "root"
 	}
 
-	db, err := sql.Open("mysql", loging+"@tcp(127.0.0.1)/masops?charset=utf8&parseTime=True&loc=Local")
-	if err != nil {
-		log.Println(err)
-	}
-	database = db
-	defer db.Close()
+	// db, err := sql.Open("mysql", loging+"@tcp(127.0.0.1)/masops?charset=utf8&parseTime=True&loc=Local")
+	//	if err != nil {
+	//		log.Println(err)
+	//	}
+	//	database = db
+	//	defer db.Close()
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", IndexHandler)
