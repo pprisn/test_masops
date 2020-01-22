@@ -32,6 +32,9 @@ func main() {
 
 	//	var err error
 	loging := os.Getenv("LOGDB")
+	if loging == "" {
+		loging = "root"
+	}
 	fmt.Printf("LOGDB=%s\n", loging)
 	//	return
 	//db, err := gorm.Open("sqlite3", "masops.db?cache=shared&mode=rwc")
@@ -111,12 +114,15 @@ func main() {
 				break
 			}
 		} //
-		n := Nsi{}
-		n.Name = nameip
+		//	n := Nsi{}
+		//n.Name = nameip
 		if *mode == "l" {
 			log.Printf("%s\t%s\t%s\n", nameip, status, version)
-			n.Status = fmt.Sprintf("\t%s\t%s", status, version)
-			db.Model(&n).Where("name = ?", nameip).Update("status", n.Status)
+			//n.Status = fmt.Sprintf("\t%s\t%s", status, version)
+			vStatus := fmt.Sprintf("\t%s\t%s", status, version)
+			//db.Model(&n).Where("name = ?", nameip).Update("status", vStatus).Error()
+			db.Exec("UPDATE nsis SET updated_at=NOW(), status=? WHERE name = ?", vStatus, nameip)
+
 		}
 
 		if *mode == "f" {

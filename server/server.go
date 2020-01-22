@@ -137,7 +137,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 func Middleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Print("middleware","\t",r.RemoteAddr,"\t",r.Method,"\t", r.URL)
+		log.Print(r.RemoteAddr, "\t", r.Method, "\t", r.URL)
 		h.ServeHTTP(w, r)
 	})
 }
@@ -149,7 +149,7 @@ func main() {
 	flag.Parse()
 
 	loging := os.Getenv("LOGDB")
-        if loging == "" {
+	if loging == "" {
 		loging = "root"
 	}
 
@@ -171,7 +171,7 @@ func main() {
 
 	srv := &http.Server{
 		Handler: router,
-		Addr:    ":3000",
+		Addr:    ":80",
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 60 * time.Second,
 		ReadTimeout:  60 * time.Second,
