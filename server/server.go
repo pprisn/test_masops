@@ -106,6 +106,41 @@ func CreateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func MCreateHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		err := r.ParseForm()
+		if err != nil {
+			log.Println(err)
+		}
+		name := r.FormValue("name")
+		status := r.FormValue("status")
+
+		result, err := database.Exec("insert into masops.nsis (name, created_at, updated_at, status) values (?, NOW(), NOW(), ?)",
+			name, status)
+		if err != nil {
+			//log.Println(err)
+			log.Printf("%s\t%s\t%s\t%s\n", r.RemoteAddr, r.Method, r.URL, err)
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(fmt.Sprint(err)))
+		} else {
+			ID_, err := result.LastInsertId()
+			if err == nil {
+				log.Printf("%s\t%s\t%s Insert ID=%d Name=%s, Status=%s\n",
+					r.RemoteAddr, r.Method, r.URL, ID_, name, status)
+			}
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(fmt.Sprint("pass")))
+		}
+		//		http.Redirect(w, r, "/", 301)
+	}
+}
+
+func DemoHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		http.ServeFile(w, r, "templates/demo.html")
+	}
+}
+
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 	rows, err := database.Query("select * from masops.nsis ")
@@ -175,6 +210,8 @@ func main() {
 	router.HandleFunc("/", IndexHandler)
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
 	router.HandleFunc("/create", CreateHandler)
+	router.HandleFunc("/mcreate", MCreateHandler)
+	router.HandleFunc("/demo", DemoHandler)
 	router.HandleFunc("/edit/{id:[0-9]+}", EditPage).Methods("GET")
 	router.HandleFunc("/edit/{id:[0-9]+}", EditHandler).Methods("POST")
 
@@ -182,7 +219,7 @@ func main() {
 
 	srv := &http.Server{
 		Handler: router,
-		Addr:    ":80",
+		Addr:    "localhost:3000",
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 60 * time.Second,
 		ReadTimeout:  60 * time.Second,

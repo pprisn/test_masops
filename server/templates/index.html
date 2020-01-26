@@ -10,14 +10,29 @@
         <script src="https://code.jquery.com/jquery-1.11.3.js"></script>
         <script src="http://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
         -->
+<!-- Remember to include jQuery :) -->
+
+   <link rel="stylesheet" type="text/css" href="static/css/mod_style.css">
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+   <script src="static/mod_script.js"></script>
+
+
+<!-- jQuery Modal -->
+<!--
+script<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+-->
         <!-- Full local -->
         <link rel="stylesheet" type="text/css" href="static/DataTables/datatables.min.css"/>
         <script type="text/javascript" src="static/DataTables/datatables.min.js"></script>
 
     </head>
     <body>
+        <div id="overlay"></div><!-- Пoдлoжкa, oднa нa всю стрaницу -->                   
         <h2>Мониторинг версий ПО МАС ОПС УФПС Липецкой обл.</h2>
-        <p><a href="/create">Добавить</a></p>
+        <!-- <p><a href="/create">Добавить</a></p> -->
+        <!--        <p><a href="/demo">Демо</a></p> -->
+        <p><a href="#modal1" class="open_modal">Добавить</a></p>
         <table id="myTable" class="cell-border compact stripe responsive buttons">
             <thead><th>Id</th><th>Время обновления</th><th>IP/имя ПК</th><th>Статус проверки</th><th></th><th></th></thead>
             {{range . }}
@@ -32,15 +47,28 @@
             </tr>
             {{end}}
         </table>
-    </body>
-<script>
 
+        <div id="modal1" class="modal_div">
+            <span class="modal_close">X</span>
+                <form id="insert-form" class="modal" method="POST">
+                  <fieldset>
+                    <legend>Добавление имени ПК в список контроля работы сервисов МАСОПС</legend>
+                         <p><label for="name">Имя ПК/IP <em>*</em></label><input type="text" name="name"> </p>
+                         <p><label for="status">Примечание</label><input type="text" name="status"> </p>
+                  </fieldset>
+                <p><input type="submit" value="Отправить"></p>
+                </form>
+        </div>
+    </body>
+
+<script>
 $(document).ready(function() {
+
   var table = $('#myTable').DataTable({
         "language": {
             "url": "static/DataTables/Russian.json"
         },
-          "lengthMenu":[[15, 25, 50, -1], [15, 25, 50, "All"]],
+          "lengthMenu":[[25, 50, -1], [25, 50, "All"]],
   // "dom": 'Blfrtip', // только пагинация
   // "dom": '<"top"i>rt<"bottom"flp><"clear">',
     dom: 'B<"clear">lfrtip', // all buttons
