@@ -34,13 +34,14 @@ script<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jqu
         <!--        <p><a href="/demo">Демо</a></p> -->
         <p><a href="#modal1" class="open_modal">Добавить</a></p>
         <table id="myTable" class="cell-border compact stripe responsive buttons">
-            <thead><th>Id</th><th>Время обновления</th><th>IP/имя ПК</th><th>Статус проверки</th><th></th><th></th></thead>
+            <thead><th>Id</th><th>Время обновления</th><th>IP/имя ПК</th><th>Статус проверки</th><th></th><th></th><th></th></thead>
             {{range . }}
-            <tr>
-                <td>{{.ID}}</td>
+            <tr data-tr-id={{.ID}}>
+                <td class="uid"> {{.ID}}</td>
                 <td>{{.UpdatedAt}}</td>
-                <td>{{.Name}}</td>
-                <td>{{.Status}}</td>
+                <td class="uname"> {{.Name}}</td>
+                <td class="ustatus"> {{.Status}}</td>
+                <td><a href="#modal2" class="edit_modal">M.Добавить</a></td>
                 <td><a href="/edit/{{.ID}}">Редакт.</a>
                 <td><a href="/delet/{{.ID}}">Удалить</a>
                 </td>
@@ -53,12 +54,29 @@ script<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jqu
                 <form id="insert-form" class="modal" method="POST">
                   <fieldset>
                     <legend>Добавление имени ПК в список контроля работы сервисов МАСОПС</legend>
-                         <p><label for="name">Имя ПК/IP <em>*</em></label><input type="text" name="name"> </p>
+                         <p><label for="name">Имя ПК <em>*</em></label><input type="text" name="name"> </p>
                          <p><label for="status">Примечание</label><input type="text" name="status"> </p>
                   </fieldset>
                 <p><input type="submit" value="Отправить"></p>
                 </form>
         </div>
+
+        <div id="modal2" class="modal_div">
+            <span class="modal_close">X</span>
+                <form id="edit-form" class="edit_modal" method="POST">
+                  <fieldset>
+                    <legend>Редактирование данных </legend>
+	                 <input type="hidden" name="id" id="eid" />
+        	         <input type="hidden" name="CreatedAt" />
+                	 <input type="hidden" name="UpdatedAt" />
+	                 <input type="hidden" name="DeletedAt" />
+                         <p><label for="name">Имя ПК <em>*</em></label><input type="text" id="ename" name="name" > </p>
+                         <p><label for="status">Примечание</label><input type="text" id="estatus" name="status"  > </p>
+                  </fieldset>
+                <p><input type="submit" value="Отправить"></p>
+                </form>
+        </div>
+
     </body>
 
 <script>

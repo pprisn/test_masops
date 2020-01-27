@@ -100,3 +100,47 @@ background: #D8E6F3;
 text-align: left;
 }
 
+
+
+.modalwindow {
+    position:fixed;
+    display:none; /* Скрываем модальное окно по умолчанию */
+    z-index:9999;
+    width:500px;
+    background: #FF5722;
+    -webkit-box-shadow: 0 8px 6px -6px black;
+    -moz-box-shadow: 0 8px 6px -6px black;
+    box-shadow: 0 8px 6px -6px black;
+    -webkit-box-shadow: 0 8px 6px -6px black;
+    -moz-box-shadow: 0 8px 6px -6px black;
+    box-shadow: 0 8px 6px -6px black;
+}
+h2 {
+    background-color: #E64A19;
+    padding: 15px;
+    font-size: 25px;
+    color: #000;
+    margin: 0;
+    font-family: arial;
+    text-align: center;
+}
+.content {
+    padding: 20px;
+    color: #fff;
+    font-size: 22px;
+    line-height: 30px;
+}
+.close {
+    float: right;
+    margin-top: -47px;
+    margin-right: 15px;
+    width: 17px;
+    height: 17px;
+    display: block;
+    padding: 10px;
+    color: #fff;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+    font-family: arial;
+}

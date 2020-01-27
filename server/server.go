@@ -135,6 +135,31 @@ func MCreateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// получаем измененные данные и сохраняем их в БД
+func MEdit(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		err := r.ParseForm()
+		if err != nil {
+			log.Println(err)
+		}
+		id := r.FormValue("id")
+		status := r.FormValue("status")
+		//	t := time.Now()
+		_, err = database.Exec("update masops.nsis set status=?, updated_at= NOW() where id = ?", status, id)
+
+		if err != nil {
+			log.Printf("%s\t%s\t%s\t%s\n", r.RemoteAddr, r.Method, r.URL, err)
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(fmt.Sprint(err)))
+		} else {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(fmt.Sprint("pass")))
+
+		}
+		//	http.Redirect(w, r, "/", 301)
+	}
+}
+
 func DemoHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		http.ServeFile(w, r, "templates/demo.html")
@@ -211,6 +236,7 @@ func main() {
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
 	router.HandleFunc("/create", CreateHandler)
 	router.HandleFunc("/mcreate", MCreateHandler)
+	router.HandleFunc("/medit", MEdit)
 	router.HandleFunc("/demo", DemoHandler)
 	router.HandleFunc("/edit/{id:[0-9]+}", EditPage).Methods("GET")
 	router.HandleFunc("/edit/{id:[0-9]+}", EditHandler).Methods("POST")
