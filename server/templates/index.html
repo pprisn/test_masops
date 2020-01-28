@@ -43,7 +43,8 @@
 <!--
         <p><a href="#modal1" class="open_modal">Добавить</a></p>
 -->
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#insertModal" data-whatever="@Какието данные">ДОБАВИТЬ НОВУЮ ЗАПИСЬ В ЖУРНАЛ</button>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#insertModal" 
+                data-whatever="@Какието данные">ДОБАВИТЬ НОВУЮ ЗАПИСЬ В ЖУРНАЛ</button>
 
         <table id="myTable" class="cell-border compact stripe responsive buttons">
             <thead><th>Id</th><th>Время обновления</th><th>IP/имя ПК</th><th>Статус проверки</th><th></th><th></th><th></th></thead>
@@ -53,10 +54,9 @@
                 <td>{{.UpdatedAt}}</td>
                 <td class="uname"> {{.Name}}</td>
                 <td class="ustatus"> {{.Status}}</td>
-                <td><a href="#editModal" class="edit_modal">Редактировать</a></td>
-                <td><a href="/edit/{{.ID}}">Редакт.</a>
-                <td><a href="/delet/{{.ID}}">Удалить</a>
-                </td>
+                <td><a href="#" class="edit_modal" data-toggle="modal" data-target="#editModal">Редактирование</a></td>
+                <td><a href="/edit/{{.ID}}">Редакт.</a></td>
+                <td><a href="/delet/{{.ID}}">Удалить</a></td>
             </tr>
             {{end}}
         </table>
@@ -126,7 +126,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="editModalLabel">Добавление имени ПК для мониторинга</h5>
+        <h5 class="modal-title" id="editModalLabel">Редактирование данных</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -135,7 +135,7 @@
         <form id="ajaxEditForm" method="POST" action='medit' >
           <div class="form-group">
             <label for="edit-id" class="col-form-label">ID</label>
-            <input type="text" class="form-control" id="edit-id" name="id" disabled >
+            <input type="text" class="form-control" id="edit-id" name="id" value=0 disabled >
             <label for="edit-name" class="col-form-label">Имя ПК:</label>
             <input type="text" class="form-control" id="edit-name" name="name" value = "R48-" disabled >
             <label for="edit-status" class="col-form-label">Статус работы:</label>
@@ -145,7 +145,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Выйти</button>
-        <button type="button" class="btn btn-primary" id="SaveInsertModal" >Записать</button>
+        <button type="button" class="btn btn-primary" id="SaveEditModal" >Записать</button>
       </div>
     </div>
   </div>
@@ -272,36 +272,44 @@ $("#SaveInsertModal").click(function(event) {
                 }                                                
         }// processData  
      } //if method
-
   });
 
 
-//Нажата кнопка Редактировать на записи
-$('.edit_modal').click( function(event){ // лoвим клик пo ссылке
-	event.preventDefault();            // вырубaем стaндaртнoе пoведение
-	var $editRow =null;
-	$editRow = $(event.target ).closest( "tr" );
-	$uid = $editRow.data('tr-id');
-	$uname = $editRow.children('td.uname').text().trim();
-	$ustatus = $editRow.children('td.ustatus').text().trim();
-        console.log('Edit '+$uid+' '+$uname+' '+$ustatus);
-        //Получим данные из таблици для визуализации формы на редактирование
-//        $('#ajaxEditForm input id="edit-id"').val($uid)
-  //      $('#ajaxEditForm input id="edit-name"').val($uname)
-    //    $('#ajaxEditForm input id="edit-status"').val($ustatus)
+// Открыть модальную форму добавления записи
+$('.edit_modal').click(function(event) {
+ 	event.preventDefault();// вырубaем стaндaртнoе пoведение
+ 	var $editRow =null;
+ 	$editRow = $(event.target ).closest( "tr" );
+ 	$uid = $editRow.data('tr-id');
+ 	$uname = $editRow.children('td.uname').text().trim();
+ 	$ustatus = $editRow.children('td.ustatus').text().trim();
+    console.log('Edit '+$uid+' '+$uname+' '+$ustatus);
+    var $editForm = $('#ajaxEditForm');
+        $editForm.find('#edit-id').val($uid);
+        $editForm.find('#edit-name').val($uname);
+        $editForm.find('#edit-status').val($ustatus);
+}); //.edit_modal
 
-	// Открыть модальную форму добавления записи
-	$('#editModal').on('show.bs.modal', function (event) {
-		//  var button = $(event.relatedTarget) // Button that triggered the modal
-		//  var recipient = button.data('whatever') // Extract info from data-* attributes
-		//  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-		//  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-		  var modal = $(this)
-		  modal.find('.modal-title').text('New message to')
-		  modal.find('.modal-body input id="edit-id"').val(recipient)
-	});
-
-});
+//Передать данные серверу для записи в БД
+$("#SaveEditModal").click(function(event) {
+    event.preventDefault();
+    var form = $('#ajaxEditForm');
+    var method = form.attr('method');
+    var url = form.attr('action'); //medit
+    var formdata = $(form).serialize();
+    console.log(formdata);
+//    ajaxCallRequest(method, url, formdata);
+    if (method =='POST') {
+    $.post('medit',formdata, processData);
+        function processData(data){
+                if (data == 'pass') {                            
+                 alert('Запись успешно обновлена !!!');                                        
+                } else {                        
+                 alert('Ошибка записи !!! '+ data);                                        
+                }                                                
+        }// processData  
+     } //if method
+  });
 
 
 
