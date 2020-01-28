@@ -1,30 +1,37 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta charset="UTF-8">
-        <title>Nsis</title>
-        <link rel="stylesheet" type="text/css" href="static/css/style.css"> 
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">     
+    
+       <title>Nsis</title>
+
+      <!-- Bootstrap CSS -->
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
  
-        <!--https://datatables.net
-        <link rel="stylesheet" href="http://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css">
-        <script src="https://code.jquery.com/jquery-1.11.3.js"></script>
-        <script src="http://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
-        -->
+      <link rel="stylesheet" type="text/css" href="static/css/style.css"> 
+ 
 <!-- Remember to include jQuery :) -->
 
+
    <link rel="stylesheet" type="text/css" href="static/css/mod_style.css">
-   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-   <script src="static/mod_script.js"></script>
 
 
-<!-- jQuery Modal -->
-<!--
-script<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
--->
+<!--   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> -->
+
+
+<!--   <script src="static/mod_script.js"></script> -->
+
+
         <!-- Full local -->
         <link rel="stylesheet" type="text/css" href="static/DataTables/datatables.min.css"/>
         <script type="text/javascript" src="static/DataTables/datatables.min.js"></script>
+
 
     </head>
     <body>
@@ -32,7 +39,12 @@ script<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jqu
         <h2>Мониторинг версий ПО МАС ОПС УФПС Липецкой обл.</h2>
         <!-- <p><a href="/create">Добавить</a></p> -->
         <!--        <p><a href="/demo">Демо</a></p> -->
+
+<!--
         <p><a href="#modal1" class="open_modal">Добавить</a></p>
+-->
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#insertModal" data-whatever="@Какието данные">ДОБАВИТЬ НОВУЮ ЗАПИСЬ В ЖУРНАЛ</button>
+
         <table id="myTable" class="cell-border compact stripe responsive buttons">
             <thead><th>Id</th><th>Время обновления</th><th>IP/имя ПК</th><th>Статус проверки</th><th></th><th></th><th></th></thead>
             {{range . }}
@@ -41,13 +53,14 @@ script<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jqu
                 <td>{{.UpdatedAt}}</td>
                 <td class="uname"> {{.Name}}</td>
                 <td class="ustatus"> {{.Status}}</td>
-                <td><a href="#modal2" class="edit_modal">M.Добавить</a></td>
+                <td><a href="#editModal" class="edit_modal">Редактировать</a></td>
                 <td><a href="/edit/{{.ID}}">Редакт.</a>
                 <td><a href="/delet/{{.ID}}">Удалить</a>
                 </td>
             </tr>
             {{end}}
         </table>
+<!--
 
         <div id="modal1" class="modal_div">
             <span class="modal_close">X</span>
@@ -60,19 +73,83 @@ script<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jqu
                 <p><input type="submit" value="Отправить"></p>
                 </form>
         </div>
+-->
 
-        <div id="modal2" class="modal_div">
+<!--        <div id="modal2" class="modal_div">
             <span class="modal_close">X</span>
-                <form action=#  onsubmit="return false;" id="edit-form" class="edit_modal" method="POST">
+                <form action='' id="edit-form" class="edit_modal" method="POST">
                   <fieldset  style="display: flex; flex-direction: column;">
                     <legend>Редактирование данных </legend>
 	                 <input type="hidden" name="id" id="eid" value=0 />
-                     <p><label for="name">Имя ПК <em>*</em></label><input type="text" name="name"   id="ename"   value="" disabled > </p>
-                     <p><label for="status">Примечание     </label><input type="text" name="status" id="estatus" value="" autofocus > </p>
+                     <p><label for="name">Имя ПК <em>*</em></label><input type="text" autocomplete="on" name="name"   id="ename"   value="R48-" class="notchange" required disabled > </p>
+                     <p><label for="status">Примечание     </label><input type="text" autocomplete="on" name="status" id="estatus" value="New " class="notchange" required autofocus > </p>
                   </fieldset>
                 <p><input type="submit" value="Отправить"></p>
                 </form>
         </div>
+-->
+<!-- CREATE NEW -->
+<div class="modal fade" id="insertModal" tabindex="-1" role="dialog" aria-labelledby="insertModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="insertModalLabel">Добавление имени ПК для мониторинга</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="ajaxCreateForm" method="POST" action='mcreate' >
+          <div class="form-group">
+            <label for="recipient-name" class="col-form-label">Имя ПК для мониторинга:</label>
+            <input type="text" class="form-control" id="recipient-name" name="name" value = "R48-" >
+            <label for="recipient-status" class="col-form-label">Статус работы:</label>
+            <input type="text" class="form-control" id="recipient-status" name="status" value = "New" >
+          </div>
+<!--          <div class="form-group">
+            <label for="message-text" class="col-form-label">Message:</label>
+            <textarea class="form-control" id="message-text"></textarea>
+          </div> -->
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Выйти</button>
+        <button type="button" class="btn btn-primary" id="SaveInsertModal" >Записать</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- EDIT RECORDS -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editModalLabel">Добавление имени ПК для мониторинга</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="ajaxEditForm" method="POST" action='medit' >
+          <div class="form-group">
+            <label for="edit-id" class="col-form-label">ID</label>
+            <input type="text" class="form-control" id="edit-id" name="id" disabled >
+            <label for="edit-name" class="col-form-label">Имя ПК:</label>
+            <input type="text" class="form-control" id="edit-name" name="name" value = "R48-" disabled >
+            <label for="edit-status" class="col-form-label">Статус работы:</label>
+            <input type="text" class="form-control" id="edit-status" name="status" value = "New" >
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Выйти</button>
+        <button type="button" class="btn btn-primary" id="SaveInsertModal" >Записать</button>
+      </div>
+    </div>
+  </div>
+</div>
 
     </body>
 
@@ -163,6 +240,71 @@ $(document).ready(function() {
 
 ]
   }); //DataTable
+
+
+// Открыть модальную форму добавления записи
+$('#insertModal').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget) // Button that triggered the modal
+  var recipient = button.data('whatever') // Extract info from data-* attributes
+  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+  var modal = $(this)
+  modal.find('.modal-title').text('New message to')
+  modal.find('.modal-body input id="recipient-name"').val(recipient)
+});
+
+//Передать на добавление в БД новой записи
+$("#SaveInsertModal").click(function(event) {
+    event.preventDefault();
+    var form = $('#ajaxCreateForm');
+    var method = form.attr('method');
+    var url = form.attr('action'); //mcreate
+    var formdata = $(form).serialize();
+    console.log(formdata);
+//    ajaxCallRequest(method, url, formdata);
+    if (method =='POST') {
+    $.post('mcreate',formdata, processData);
+        function processData(data){
+                if (data == 'pass') {                            
+                 alert('Запись успешно добавлена !!!');                                        
+                } else {                        
+                 alert('Ошибка записи !!! '+ data);                                        
+                }                                                
+        }// processData  
+     } //if method
+
+  });
+
+
+//Нажата кнопка Редактировать на записи
+$('.edit_modal').click( function(event){ // лoвим клик пo ссылке
+	event.preventDefault();            // вырубaем стaндaртнoе пoведение
+	var $editRow =null;
+	$editRow = $(event.target ).closest( "tr" );
+	$uid = $editRow.data('tr-id');
+	$uname = $editRow.children('td.uname').text().trim();
+	$ustatus = $editRow.children('td.ustatus').text().trim();
+        console.log('Edit '+$uid+' '+$uname+' '+$ustatus);
+        //Получим данные из таблици для визуализации формы на редактирование
+//        $('#ajaxEditForm input id="edit-id"').val($uid)
+  //      $('#ajaxEditForm input id="edit-name"').val($uname)
+    //    $('#ajaxEditForm input id="edit-status"').val($ustatus)
+
+	// Открыть модальную форму добавления записи
+	$('#editModal').on('show.bs.modal', function (event) {
+		//  var button = $(event.relatedTarget) // Button that triggered the modal
+		//  var recipient = button.data('whatever') // Extract info from data-* attributes
+		//  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+		//  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+		  var modal = $(this)
+		  modal.find('.modal-title').text('New message to')
+		  modal.find('.modal-body input id="edit-id"').val(recipient)
+	});
+
+});
+
+
+
 });//document
 
 </script>
