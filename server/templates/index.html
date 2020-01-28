@@ -63,15 +63,12 @@ script<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jqu
 
         <div id="modal2" class="modal_div">
             <span class="modal_close">X</span>
-                <form id="edit-form" class="edit_modal" method="POST">
-                  <fieldset>
+                <form action=#  onsubmit="return false;" id="edit-form" class="edit_modal" method="POST">
+                  <fieldset  style="display: flex; flex-direction: column;">
                     <legend>Редактирование данных </legend>
-	                 <input type="hidden" name="id" id="eid" />
-        	         <input type="hidden" name="CreatedAt" />
-                	 <input type="hidden" name="UpdatedAt" />
-	                 <input type="hidden" name="DeletedAt" />
-                         <p><label for="name">Имя ПК <em>*</em></label><input type="text" id="ename" name="name" > </p>
-                         <p><label for="status">Примечание</label><input type="text" id="estatus" name="status"  > </p>
+	                 <input type="hidden" name="id" id="eid" value=0 />
+                     <p><label for="name">Имя ПК <em>*</em></label><input type="text" name="name"   id="ename"   value="" disabled > </p>
+                     <p><label for="status">Примечание     </label><input type="text" name="status" id="estatus" value="" autofocus > </p>
                   </fieldset>
                 <p><input type="submit" value="Отправить"></p>
                 </form>
