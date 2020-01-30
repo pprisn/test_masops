@@ -3,48 +3,37 @@
     <head>
        <meta charset="UTF-8">
        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">     
-    
        <title>Nsis</title>
-
       <!-- Bootstrap CSS -->
-
 <!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 -->
 
-    <link rel="stylesheet" href="static/bootstrap-4.3.1-dist/css/bootstrap.min.css">
-    <script type="text/javascript" src="static/jquery/jquery-3.4.1.min.js"></script>
-    <script type="text/javascript" src="static/popper/popper.min.js"></script>
-    <script type="text/javascript" src="static/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
-
-
-
- 
-      <link rel="stylesheet" type="text/css" href="static/css/style.css"> 
+     <link rel="stylesheet" href="static/bootstrap-4.3.1-dist/css/bootstrap.min.css">
+     <script type="text/javascript" src="static/jquery/jquery-3.4.1.min.js"></script>
+     <script type="text/javascript" src="static/popper/popper.min.js"></script>
+     <script type="text/javascript" src="static/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
+     <link rel="stylesheet" type="text/css" href="static/css/style.css"> 
  
 <!-- Remember to include jQuery :) -->
-
 <!--
    <link rel="stylesheet" type="text/css" href="static/css/mod_style.css">
 -->
-
 <!--   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> -->
-
-
 <!--   <script src="static/mod_script.js"></script> -->
 
 
         <!-- Full local -->
-        <link rel="stylesheet" type="text/css" href="static/DataTables/datatables.min.css"/>
-        <script type="text/javascript" src="static/DataTables/datatables.min.js"></script>
+      <link rel="stylesheet" type="text/css" href="static/DataTables/datatables.min.css"/>
+      <script type="text/javascript" src="static/DataTables/datatables.min.js"></script>
 
 
     </head>
     <body>
         <div id="overlay"></div><!-- Пoдлoжкa, oднa нa всю стрaницу -->                   
-        <h2>Мониторинг версий ПО МАС ОПС УФПС Липецкой обл.</h2>
+        <h2 class="text-primary" >Мониторинг версий ПО МАС ОПС УФПС Липецкой обл.</h2>
         <!-- <p><a href="/create">Добавить</a></p> -->
         <!--        <p><a href="/demo">Демо</a></p> -->
 
@@ -54,8 +43,8 @@
        <p> <button type="button" class="btn btn-light" data-toggle="modal" data-target="#insertModal" 
                 data-whatever="@Какието данные">&#9997;ДОБАВИТЬ НОВУЮ ЗАПИСЬ В ЖУРНАЛ</button> </p>
 
-        <table id="myTable" class="cell-border compact stripe responsive buttons">
-            <thead><th>Id</th><th>Время обновления</th><th>IP/имя ПК</th><th>Статус проверки</th><th></th></thead>
+       <table id="myTable" class="cell-border compact stripe  buttons"> <!-- responsive -->
+            <thead><th>Id</th><th>Время обновления</th><th>Имя ПК</th><th>Статус проверки</th><th></th></thead>
             {{range . }}
             <tr data-tr-id={{.ID}}>
                 <td class="uid"> {{.ID}}</td>
@@ -148,7 +137,7 @@
   </div>
 </div>
 
-    </body>
+</body>
 
 <script>
 $(document).ready(function() {
@@ -272,7 +261,6 @@ $("#SaveInsertModal").click(function(event) {
         }// processData  
      } //if method
   });
-
 
 // Выбрана ссылка "Редактировать" на записи 
 $('.edit_modal').click(function(event) {
