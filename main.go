@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"io"
+        "encoding/json"
 	"log"
 	"net"
 	"os"
@@ -22,10 +23,27 @@ import (
 var fsrc = flag.String("fsrc", "./fsrc.txt", `Файл с данными адресов для мониторинга отклика работы службы МАСОПС`)
 var mode = flag.String("mode", "l", `Режим логирования отклика службы, l краткий, f полный`)
 
+/*
+nsi
+http://localhost:7502/v1/
+
+sdo
+http://localhost:7522/v1/
+
+update
+http://localhost:7504/v1/
+
+easuser
+http://localhost:7501/v1/
+*/
+
 type Nsi struct {
 	gorm.Model
-	Name   string `gorm:"type:varchar(100);unique;not null"`
-	Status string `gorm:"type:varchar(255)"`
+	Name       string `gorm:"type:varchar(100);unique;not null"`
+	Status     string `gorm:"type:varchar(255)"`
+	Statussdo  string `gorm:"type:varchar(255)"`
+	Statusupd  string `gorm:"type:varchar(255)"`
+	Statusauth string `gorm:"type:varchar(255)"`
 }
 
 func main() {
@@ -72,28 +90,54 @@ func main() {
 	defer rows.Close()
 
 	var name string
-	var version string
-	var status string
+	//var version string
+	var port string
+	var vStatus7502, vStatus7522, vStatus7504, vStatus7501 string
 
 	var i int = 0
 	for rows.Next() {
 		i = i + 1
 		rows.Scan(&name)
 		nameip = name
-		fmt.Printf("%d\t%s:7502\n", i, nameip)
-		conn, err := d.Dial("tcp", nameip+".main.russianpost.ru"+":7502")
-		if err != nil {
-			// handle error
-			log.Printf("\tError\t%s\t%s", nameip, err)
-			fmt.Printf("\tError\t%s\t%s\n", nameip, err)
-			continue
-		}
-		conn.SetReadDeadline(time.Now().Add(time.Second * 10))
-		fmt.Fprintf(conn, "GET /v1/ HTTP/1.0\r\n\r\n")
+		vStatus7502, vStatus7522, vStatus7504, vStatus7501 = "", "", "", ""
+		port = "7502"
+		vStatus7502 = checkStatus(d, i, nameip, port)
+		port = "7522"
+		vStatus7522 = checkStatus(d, i, nameip, port)
+		port = "7504"
+		vStatus7504 = checkStatus(d, i, nameip, port)
+		port = "7501"
+		vStatus7501 = checkStatus(d, i, nameip, port)
 
-		jsonStatus := bufio.NewReader(conn) //.ReadString('\n')
-		version = ""
-		status = ""
+		//db.Model(&n).Where("name = ?", nameip).Update("status", vStatus).Error()
+		db.Exec("UPDATE nsis SET updated_at=NOW(), status=? , statussdo=? , statusupd=? , statusauth=? WHERE name = ?", vStatus7502, vStatus7522, vStatus7504, vStatus7501, nameip)
+
+	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Println(os.Stderr, "reading standard input:", err)
+	}
+	t1 := time.Now()
+	log.Printf("СТОП. Время выполнения %v сек.\n", t1.Sub(t0))
+
+}
+
+func checkStatus(d net.Dialer, i int, ip string, port string) string {
+	fmt.Printf("%d\t%s:%s\n", i, ip, port)
+	conn, err := d.Dial("tcp", ip+".main.russianpost.ru"+":"+port)
+	if err != nil {
+		// handle error
+		log.Printf("\tError\t%s\t%s", ip, err)
+		er := fmt.Sprintf("Error Dial:[%s]{%s}", ip, err)
+		return er
+	}
+	conn.SetReadDeadline(time.Now().Add(time.Second * 10))
+	fmt.Fprintf(conn, "GET /v1/ HTTP/1.0\r\n\r\n")
+	jsonStatus := bufio.NewReader(conn) //.ReadString('\n')
+
+	var status, version string = "", ""
+
+	/*
 		for {
 			line, err := jsonStatus.ReadString('\n')
 			if len(line) == 0 && err != nil {
@@ -107,35 +151,35 @@ func main() {
 
 			if strings.Contains(line, `"version":`) {
 				version = line[:len(line)-1]
+
 			} else if strings.Contains(line, `"status"`) {
 				status = line[:len(line)-1]
+
 			}
 			if len(version) > 0 && len(status) > 0 {
 				break
 			}
+
 		} //
-		//	n := Nsi{}
-		//n.Name = nameip
-		if *mode == "l" {
-			log.Printf("%s\t%s\t%s\n", nameip, status, version)
-			//n.Status = fmt.Sprintf("\t%s\t%s", status, version)
-			vStatus := fmt.Sprintf("\t%s\t%s", status, version)
-			//db.Model(&n).Where("name = ?", nameip).Update("status", vStatus).Error()
-			db.Exec("UPDATE nsis SET updated_at=NOW(), status=? WHERE name = ?", vStatus, nameip)
+	*/
 
-		}
+	var dat map[string]interface{}
+	if err := json.Unmarshal(jsonStatus, &dat); err != nil {
+		return "Error Unmarshal"
+	} else {
 
-		if *mode == "f" {
-			// TO DO FOR Full mode
-		}
+		version = fmt.Sprintf("%s", dat["version"])
+		status = fmt.Sprintf("%s", dat["status"])
 
+		//fmt.Println(dat)
+		version = fmt.Sprintf("%s", dat["version"])
+		status = fmt.Sprintf("%s", dat["status"])
+
+		log.Printf("%s\t%s\t%s\n", ip, status, version)
+		//n.Status = fmt.Sprintf("\t%s\t%s", status, version)
+		vStatus := fmt.Sprintf("\t%s\t%s", status, version)
+		return vStatus
 	}
-
-	if err := scanner.Err(); err != nil {
-		fmt.Println(os.Stderr, "reading standard input:", err)
-	}
-	t1 := time.Now()
-	log.Printf("СТОП. Время выполнения %v сек.\n", t1.Sub(t0))
 
 }
 
@@ -170,3 +214,59 @@ func check_nsi(db *gorm.DB, f *os.File) error {
 	}
 	return nil
 }
+
+/*
+
+
+	fmt.Printf("%d\t%s:7502\n", i, nameip)
+	conn, err := d.Dial("tcp", nameip+".main.russianpost.ru"+":7502")
+	if err != nil {
+		// handle error
+		log.Printf("\tError\t%s\t%s", nameip, err)
+		fmt.Printf("\tError\t%s\t%s\n", nameip, err)
+		continue
+	}
+	conn.SetReadDeadline(time.Now().Add(time.Second * 10))
+	fmt.Fprintf(conn, "GET /v1/ HTTP/1.0\r\n\r\n")
+	jsonStatus := bufio.NewReader(conn) //.ReadString('\n')
+
+
+	fmt.Printf("%d\t%s:7522\n", i, nameip)
+	conn, err := d.Dial("tcp", nameip+".main.russianpost.ru"+":7522")
+	if err != nil {
+		// handle error
+		log.Printf("\tError\t%s\t%s", nameip, err)
+		fmt.Printf("\tError\t%s\t%s\n", nameip, err)
+		continue
+	}
+	conn.SetReadDeadline(time.Now().Add(time.Second * 10))
+	fmt.Fprintf(conn, "GET /v1/ HTTP/1.0\r\n\r\n")
+	jsonStatus7522 := bufio.NewReader(conn) //.ReadString('\n')
+
+
+	fmt.Printf("%d\t%s:7504\n", i, nameip)
+	conn, err := d.Dial("tcp", nameip+".main.russianpost.ru"+":7504")
+	if err != nil {
+		// handle error
+		log.Printf("\tError\t%s\t%s", nameip, err)
+		fmt.Printf("\tError\t%s\t%s\n", nameip, err)
+		continue
+	}
+	conn.SetReadDeadline(time.Now().Add(time.Second * 10))
+	fmt.Fprintf(conn, "GET /v1/ HTTP/1.0\r\n\r\n")
+	jsonStatus7504 := bufio.NewReader(conn) //.ReadString('\n')
+
+
+	fmt.Printf("%d\t%s:7501\n", i, nameip)
+	conn, err := d.Dial("tcp", nameip+".main.russianpost.ru"+":7501")
+	if err != nil {
+		// handle error
+		log.Printf("\tError\t%s\t%s", nameip, err)
+		fmt.Printf("\tError\t%s\t%s\n", nameip, err)
+		continue
+	}
+	conn.SetReadDeadline(time.Now().Add(time.Second * 10))
+	fmt.Fprintf(conn, "GET /v1/ HTTP/1.0\r\n\r\n")
+	jsonStatus7501 := bufio.NewReader(conn) //.ReadString('\n')
+
+*/
