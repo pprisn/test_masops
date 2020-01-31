@@ -28,12 +28,15 @@ type Nsi struct {
 */
 
 type Nsi struct {
-	ID        uint
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time
-	Name      string
-	Status    string
+	ID         uint
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	DeletedAt  *time.Time
+	Name       string
+	Status     string
+	Statussdo  string
+	Statusupd  string
+	Statusauth string
 }
 
 var database *sql.DB
@@ -114,9 +117,11 @@ func MCreateHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		name := r.FormValue("name")
 		status := r.FormValue("status")
+		statussdo := r.FormValue("statussdo")
+		statusupd := r.FormValue("statusupd")
+		statusauth := r.FormValue("statusauth")
 
-		result, err := database.Exec("insert into masops.nsis (name, created_at, updated_at, status) values (?, NOW(), NOW(), ?)",
-			name, status)
+		result, err := database.Exec("insert into masops.nsis (name, created_at, updated_at, status, statussdo,statusupd,statusauth) values (?, NOW(), NOW(), ?, ?, ?, ?)", name, status, statussdo, statusupd, statusauth)
 		if err != nil {
 			//log.Println(err)
 			log.Printf("%s\t%s\t%s\t%s\n", r.RemoteAddr, r.Method, r.URL, err)
@@ -144,8 +149,12 @@ func MEdit(w http.ResponseWriter, r *http.Request) {
 		}
 		id := r.FormValue("id")
 		status := r.FormValue("status")
+		statussdo := r.FormValue("statussdo")
+		statusupd := r.FormValue("statusupd")
+		statusauth := r.FormValue("statusauth")
+
 		//	t := time.Now()
-		_, err = database.Exec("update masops.nsis set status=?, updated_at= NOW() where id = ?", status, id)
+		_, err = database.Exec("update masops.nsis set status=?, statussdo=?, statusupd=?,statusauth=?, updated_at= NOW() where id = ?", status, statussdo, statusupd, statusauth, id)
 
 		if err != nil {
 			log.Printf("%s\t%s\t%s\t%s\n", r.RemoteAddr, r.Method, r.URL, err)
@@ -178,7 +187,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		p := Nsi{}
-		err := rows.Scan(&p.ID, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt, &p.Name, &p.Status)
+		err := rows.Scan(&p.ID, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt, &p.Name, &p.Status, &p.Statussdo, &p.Statusupd, &p.Statusauth)
 		if err != nil {
 			fmt.Println(err)
 			continue

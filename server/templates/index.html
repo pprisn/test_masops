@@ -44,13 +44,17 @@
                 data-whatever="@Какието данные">&#9997;ДОБАВИТЬ НОВУЮ ЗАПИСЬ В ЖУРНАЛ</button> </p>
 
        <table id="myTable" class="cell-border compact stripe  buttons"> <!-- responsive -->
-            <thead><th>Id</th><th>Время обновления</th><th>Имя ПК</th><th>Статус проверки</th><th></th></thead>
+            <thead><th>Id</th><th>Время обновления</th><th>Имя ПК</th><th>СтатусNSI</th><th>СтатусSDO</th>
+                    <th>СтатусUPD</th><th>СтатусAUTH</th><th></th></thead>
             {{range . }}
             <tr data-tr-id={{.ID}}>
                 <td class="uid"> {{.ID}}</td>
                 <td>{{.UpdatedAt}}</td>
                 <td class="uname"> {{.Name}}</td>
                 <td class="ustatus"> {{.Status}}</td>
+                <td class="ustatussdo"> {{.Statussdo}}</td>
+                <td class="ustatusupd"> {{.Statusupd}}</td>
+                <td class="ustatusauth"> {{.Statusauth}}</td>
                 <td><a href="#" class="edit_modal" data-toggle="modal" data-target="#editModal">&#9998;</a></td>
              <!-- <td><a href="/edit/{{.ID}}">Редакт.</a></td>
                 <td><a href="/delet/{{.ID}}">Удалить</a></td>
@@ -74,8 +78,16 @@
           <div class="form-group">
             <label for="recipient-name" class="col-form-label">Имя ПК для мониторинга:</label>
             <input type="text" class="form-control" id="recipient-name" name="name" value = "R48-" >
-            <label for="recipient-status" class="col-form-label">Статус работы:</label>
+            <label for="recipient-status" class="col-form-label">Статус NSI:</label>
             <input type="text" class="form-control" id="recipient-status" name="status" value = "New" >
+            <label for="recipient-statussdo" class="col-form-label">Статус SDO:</label>
+            <input type="text" class="form-control" id="recipient-statussdo" name="statussdo" value = "New" >
+            <label for="recipient-statusudp" class="col-form-label">Статус UPD:</label>
+            <input type="text" class="form-control" id="recipient-statusupd" name="statusupd" value = "New" >
+            <label for="recipient-statusauth" class="col-form-label">Статус AUTH:</label>
+            <input type="text" class="form-control" id="recipient-statusauth" name="statusauth" value = "New" >
+
+
           </div>
         </form>
       </div>
@@ -105,8 +117,14 @@
             <input type="text" class="form-control" id="edit-id" name="id" disabled >
             <label for="edit-name" class="col-form-label">Имя ПК:</label>
             <input type="text" class="form-control" id="edit-name" name="name" disabled >
-            <label for="edit-status" class="col-form-label">Статус работы:</label>
+            <label for="edit-status" class="col-form-label">Статус NSI:</label>
             <input type="text" class="form-control" id="edit-status" name="status" >
+            <label for="edit-statussdo" class="col-form-label">Статус SDO:</label>
+            <input type="text" class="form-control" id="edit-statussdo" name="statussdo" >
+            <label for="edit-statusupd" class="col-form-label">Статус UPD:</label>
+            <input type="text" class="form-control" id="edit-statusupd" name="statusupd" >
+            <label for="edit-statusauth" class="col-form-label">Статус AUTH:</label>
+            <input type="text" class="form-control" id="edit-statusauth" name="statusauth">
           </div>
         </form>
       </div>
@@ -146,7 +164,7 @@ $(document).ready(function() {
         "language": {
             "url": "static/DataTables/Russian.json"
         },
-          "lengthMenu":[[25, 50, -1], [25, 50, "All"]],
+          "lengthMenu":[[20,25,50, -1], [20,25, 50, "All"]],
   // "dom": 'Blfrtip', // только пагинация
   // "dom": '<"top"i>rt<"bottom"flp><"clear">',
     dom: 'B<"clear">lfrtip', // all buttons
@@ -173,7 +191,7 @@ $(document).ready(function() {
 //                filename: 'file_name',
                 text: 'Отчет CSV',
                 exportOptions: {
-                        columns: [0, 1 ,2, 3]
+                        columns: [0, 1 ,2, 3, 4, 5, 6]
                 },
                 //Function which customize the CSV (input : csv is the object that you can preprocesss)
                 customize: function (csv) {
@@ -181,7 +199,7 @@ $(document).ready(function() {
                         var split_csv = csv.split("\n");
  
                         //Remove the row one to personnalize the headers
-                        split_csv[0] = '"ID";"Time";"IP";"Status"';
+                        split_csv[0] = '"ID";"Time";"Name";"StatusNSI";"Statussdo";"Statusupd";"Statusauth"';
  
                         //For each row except the first one (header)
                         $.each(split_csv.slice(1), function (index, csv_row) {
@@ -211,7 +229,7 @@ $(document).ready(function() {
                 filename: 'file_name',
                 text: 'Отчет EXCEL',
                 exportOptions: {
-                        columns: [0, 1 ,2, 3]
+                        columns: [0, 1 ,2, 3, 4, 5, 6]
                 }
         },
         {
@@ -220,7 +238,7 @@ $(document).ready(function() {
                 text: 'Отчет PDF',
                 messageTop: 'Мониторинг версий ПО МАС ОПС УФПС Липецкой обл.',
                 exportOptions: {
-                        columns: [0, 1, 2, 3]
+                        columns: [0, 1, 2, 3, 4, 5, 6]
                 }
         }
 
@@ -230,13 +248,13 @@ $(document).ready(function() {
 
 // Открыть модальную форму добавления записи
 $('#insertModal').on('show.bs.modal', function (event) {
-  var button = $(event.relatedTarget) // Button that triggered the modal
-  var recipient = button.data('whatever') // Extract info from data-* attributes
-  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-  var modal = $(this)
-  modal.find('.modal-title').text('New message to')
-  modal.find('.modal-body input id="recipient-name"').val(recipient)
+//  var button = $(event.relatedTarget) // Button that triggered the modal
+//  var recipient = button.data('whatever') // Extract info from data-* attributes
+//  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+//  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+//  var modal = $(this)
+//  modal.find('.modal-title').text('New message to')
+//  modal.find('.modal-body input id="recipient-name"').val(recipient)
 });
 
 //Передать на добавление в БД новой записи
@@ -271,11 +289,18 @@ $('.edit_modal').click(function(event) {
  	$uid = $editRow.data('tr-id');
  	$uname = $editRow.children('td.uname').text().trim();
  	$ustatus = $editRow.children('td.ustatus').text().trim();
+  	$ustatussdo = $editRow.children('td.ustatussdo').text().trim(); 
+   	$ustatusupd = $editRow.children('td.ustatusupd').text().trim();      
+   	$ustatusauth = $editRow.children('td.ustatusauth').text().trim(); 
+
     console.log('Edit '+$uid+' '+$uname+' '+$ustatus);
     var $editForm = $('#ajaxEditForm');
         $editForm.find('#edit-id').val($uid);
         $editForm.find('#edit-name').val($uname);
         $editForm.find('#edit-status').val($ustatus);
+        $editForm.find('#edit-statussdo').val($ustatussdo);
+        $editForm.find('#edit-statusupd').val($ustatusupd);
+        $editForm.find('#edit-statusauth').val($ustatusauth);
 }); //.edit_modal
 
 //Передать данные серверу для записи в БД
