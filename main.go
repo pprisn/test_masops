@@ -5,11 +5,11 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"io"
-        "encoding/json"
 	"log"
 	"net"
 	"os"
@@ -133,8 +133,11 @@ func checkStatus(d net.Dialer, i int, ip string, port string) string {
 	}
 	conn.SetReadDeadline(time.Now().Add(time.Second * 10))
 	fmt.Fprintf(conn, "GET /v1/ HTTP/1.0\r\n\r\n")
-	jsonStatus := bufio.NewReader(conn) //.ReadString('\n')
-
+	//	jsonStatus := bufio.NewReader(conn) //.ReadString('\n')
+	buf := make([]byte, 256)
+	if _, err := io.ReadFull(conn, buf); err != nil {
+		return "Error Read conn"
+	}
 	var status, version string = "", ""
 
 	/*
@@ -164,7 +167,7 @@ func checkStatus(d net.Dialer, i int, ip string, port string) string {
 	*/
 
 	var dat map[string]interface{}
-	if err := json.Unmarshal(jsonStatus, &dat); err != nil {
+	if err := json.Unmarshal(buf, &dat); err != nil {
 		return "Error Unmarshal"
 	} else {
 
