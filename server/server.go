@@ -16,17 +16,6 @@ import (
 	"time"
 )
 
-/*
-type Nsi struct {
-	ID	   uint  `sql:int(10);unsigned NOT NULL AUTO_INCREMENT`
-	CreatedAt time.Time `sql: datetime DEFAULT NULL`
-	UpdatedAt time.Time `sql: datetime DEFAULT NULL`
-	DeletedAt *time.Time `sql:"index"`
-	Name   string `sql:varchar(100);unique;not null`
-	Status string `sql:varchar(255) DEFAULT NULL`
-}
-*/
-
 type Nsi struct {
 	ID         uint
 	CreatedAt  time.Time
@@ -194,7 +183,6 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		nsis = append(nsis, p)
 	}
-
 	tmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
 		log.Println(err)
@@ -202,23 +190,18 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = tmpl.Execute(w, nsis)
 	log.Println(err)
-
 }
 
 func Middleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Print(r.RemoteAddr, "\t", r.Method, "\t", r.URL)
-
 		db, err := sql.Open("mysql", loging+"@tcp(127.0.0.1)/masops?charset=utf8&parseTime=True&loc=Local")
-
 		defer db.Close()
 		if err != nil {
 			log.Println(err)
-
 		}
 		database = db
 		h.ServeHTTP(w, r)
-
 	})
 }
 
