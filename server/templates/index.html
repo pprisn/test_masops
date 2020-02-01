@@ -44,8 +44,8 @@
                 data-whatever="@Какието данные">&#9997;ДОБАВИТЬ НОВУЮ ЗАПИСЬ В ЖУРНАЛ</button> </p>
 
        <table id="myTable" class="cell-border compact stripe  buttons"> <!-- responsive -->
-            <thead><th>Id</th><th>Время обновления</th><th>Имя ПК</th><th>СтатусNSI</th><th>СтатусSDO</th>
-                    <th>СтатусUPD</th><th>СтатусAUTH</th><th></th></thead>
+            <thead><th>Id</th><th>Время обновления</th><th>Имя</th><th>Russian Post EAS nsi</th><th>Russian Post EAS sdo</th>
+                    <th>Russian Post EAS Configuration</th><th>Russian Post EAS user</th><th></th></thead>
             {{range . }}
             <tr data-tr-id={{.ID}}>
                 <td class="uid"> {{.ID}}</td>
@@ -78,13 +78,13 @@
           <div class="form-group">
             <label for="recipient-name" class="col-form-label">Имя ПК для мониторинга:</label>
             <input type="text" class="form-control" id="recipient-name" name="name" value = "R48-" >
-            <label for="recipient-status" class="col-form-label">Статус NSI:</label>
+            <label for="recipient-status" class="col-form-label">Статус RussianPostEASnsi:</label>
             <input type="text" class="form-control" id="recipient-status" name="status" value = "New" >
-            <label for="recipient-statussdo" class="col-form-label">Статус SDO:</label>
+            <label for="recipient-statussdo" class="col-form-label">Статус RussianPostEASsdo:</label>
             <input type="text" class="form-control" id="recipient-statussdo" name="statussdo" value = "New" >
-            <label for="recipient-statusudp" class="col-form-label">Статус UPD:</label>
+            <label for="recipient-statusudp" class="col-form-label">Статус RussianPostEASConfiguration:</label>
             <input type="text" class="form-control" id="recipient-statusupd" name="statusupd" value = "New" >
-            <label for="recipient-statusauth" class="col-form-label">Статус AUTH:</label>
+            <label for="recipient-statusauth" class="col-form-label">Статус RussianPostEASuser:</label>
             <input type="text" class="form-control" id="recipient-statusauth" name="statusauth" value = "New" >
 
 
@@ -117,13 +117,13 @@
             <input type="text" class="form-control" id="edit-id" name="id" disabled >
             <label for="edit-name" class="col-form-label">Имя ПК:</label>
             <input type="text" class="form-control" id="edit-name" name="name" disabled >
-            <label for="edit-status" class="col-form-label">Статус NSI:</label>
+            <label for="edit-status" class="col-form-label">Статус RussianPostEASnsi:</label>
             <input type="text" class="form-control" id="edit-status" name="status" >
-            <label for="edit-statussdo" class="col-form-label">Статус SDO:</label>
+            <label for="edit-statussdo" class="col-form-label">Статус RussianPostEASsdo:</label>
             <input type="text" class="form-control" id="edit-statussdo" name="statussdo" >
-            <label for="edit-statusupd" class="col-form-label">Статус UPD:</label>
+            <label for="edit-statusupd" class="col-form-label">Статус RussianPostEASConfiguration:</label>
             <input type="text" class="form-control" id="edit-statusupd" name="statusupd" >
-            <label for="edit-statusauth" class="col-form-label">Статус AUTH:</label>
+            <label for="edit-statusauth" class="col-form-label">Статус RussianPostEASuser:</label>
             <input type="text" class="form-control" id="edit-statusauth" name="statusauth">
           </div>
         </form>

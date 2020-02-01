@@ -33,10 +33,10 @@ type Nsi struct {
 	UpdatedAt  time.Time
 	DeletedAt  *time.Time
 	Name       string
-	Status     string
-	Statussdo  string
-	Statusupd  string
-	Statusauth string
+	Status     string //:7502 RussianPostEASnsi
+	Statussdo  string //:7522 RussianPostEASsdo
+	Statusupd  string //:7500 RussianPostEASConfiguration
+	Statusauth string //:7501 RussianpostEASuser
 }
 
 var database *sql.DB
