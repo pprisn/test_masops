@@ -45,6 +45,7 @@ type Nsi struct {
 	Statussdo  string `gorm:"type:varchar(255)"` //:7522
 	Statusupd  string `gorm:"type:varchar(255)"` //:7500
 	Statusauth string `gorm:"type:varchar(255)"` //:7501
+	Statustrans string `gorm:"type:varchar(255)"` //:7524
 }
 
 func main() {
@@ -93,14 +94,14 @@ func main() {
 	var name string
 	//var version string
 	var port string
-	var vStatus7502, vStatus7522, vStatus7500, vStatus7501 string
+	var vStatus7502, vStatus7522, vStatus7500, vStatus7501 , vStatus7524 string
 
 	var i int = 0
 	for rows.Next() {
 		i = i + 1
 		rows.Scan(&name)
 		nameip = name
-		vStatus7502, vStatus7522, vStatus7500, vStatus7501 = "", "", "", ""
+		vStatus7502, vStatus7522, vStatus7500, vStatus7501 , vStatus7524 = "", "", "", "",""
 		port = "7502"
 		vStatus7502 = checkStatus(i, nameip, port)
 		port = "7522"
@@ -109,9 +110,11 @@ func main() {
 		vStatus7500 = checkStatus(i, nameip, port)
 		port = "7501"
 		vStatus7501 = checkStatus(i, nameip, port)
+		port = "7524"
+		vStatus7524 = checkStatus(i, nameip, port)
 
 		//db.Model(&n).Where("name = ?", nameip).Update("status", vStatus).Error()
-		db.Exec("UPDATE nsis SET updated_at=NOW(), status=? , statussdo=? , statusupd=? , statusauth=? WHERE name = ?", vStatus7502, vStatus7522, vStatus7500, vStatus7501, nameip)
+		db.Exec("UPDATE nsis SET updated_at=NOW(), status=? , statussdo=? , statusupd=? , statusauth=? , statustrans=? WHERE name = ?", vStatus7502, vStatus7522, vStatus7500, vStatus7501, vStatus7524, nameip)
 
 	}
 

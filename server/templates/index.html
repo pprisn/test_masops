@@ -33,7 +33,7 @@
 
        <table id="myTable" class="cell-border compact stripe  buttons"> <!-- responsive -->
             <thead><th>Id</th><th>Время обновления</th><th>Имя</th><th>Russian Post EAS nsi</th><th>Russian Post EAS sdo</th>
-                    <th>Russian Post EAS Configuration</th><th>Russian Post EAS user</th><th></th></thead>
+                    <th>Russian Post EAS Configuration</th><th>Russian Post EAS user</th><th>Russian Post EAS trans</th><th></th></thead>
             {{range . }}
             <tr data-tr-id={{.ID}}>
                 <td class="uid"> {{.ID}}</td>
@@ -43,6 +43,7 @@
                 <td class="ustatussdo"> {{.Statussdo}}</td>
                 <td class="ustatusupd"> {{.Statusupd}}</td>
                 <td class="ustatusauth"> {{.Statusauth}}</td>
+                <td class="ustatustrans"> {{.Statustrans}}</td>
                 <td><a href="#" class="edit_modal" data-toggle="modal" data-target="#editModal">&#9998;</a></td>
              <!-- <td><a href="/edit/{{.ID}}">Редакт.</a></td>
                 <td><a href="/delet/{{.ID}}">Удалить</a></td>
@@ -74,6 +75,8 @@
             <input type="text" class="form-control" id="recipient-statusupd" name="statusupd" value = "New" >
             <label for="recipient-statusauth" class="col-form-label">Статус RussianPostEASuser:</label>
             <input type="text" class="form-control" id="recipient-statusauth" name="statusauth" value = "New" >
+            <label for="recipient-statustrans" class="col-form-label">Статус RussianPostEAStrans:</label>
+            <input type="text" class="form-control" id="recipient-statustrans" name="statustrans" value = "New" >
           </div>
         </form>
       </div>
@@ -111,6 +114,8 @@
             <input type="text" class="form-control" id="edit-statusupd" name="statusupd" >
             <label for="edit-statusauth" class="col-form-label">Статус RussianPostEASuser:</label>
             <input type="text" class="form-control" id="edit-statusauth" name="statusauth">
+            <label for="edit-statustrans" class="col-form-label">Статус RussianPostEAStrans:</label>
+            <input type="text" class="form-control" id="edit-statustrans" name="statustrans">
           </div>
         </form>
       </div>
@@ -177,7 +182,7 @@ $(document).ready(function() {
 //                filename: 'file_name',
                 text: 'Отчет CSV',
                 exportOptions: {
-                        columns: [0, 1 ,2, 3, 4, 5, 6]
+                        columns: [0, 1 ,2, 3, 4, 5, 6, 7]
                 },
                 //Function which customize the CSV (input : csv is the object that you can preprocesss)
                 customize: function (csv) {
@@ -185,7 +190,7 @@ $(document).ready(function() {
                         var split_csv = csv.split("\n");
  
                         //Remove the row one to personnalize the headers
-                        split_csv[0] = '"ID";"Time";"Name";"StatusNSI";"Statussdo";"Statusupd";"Statusauth"';
+                        split_csv[0] = '"ID";"Time";"Name";"StatusNSI";"Statussdo";"Statusupd";"Statusauth";"Statustrans"';
  
                         //For each row except the first one (header)
                         $.each(split_csv.slice(1), function (index, csv_row) {
@@ -215,7 +220,7 @@ $(document).ready(function() {
                 filename: 'file_name',
                 text: 'Отчет EXCEL',
                 exportOptions: {
-                        columns: [0, 1 ,2, 3, 4, 5, 6]
+                        columns: [0, 1 ,2, 3, 4, 5, 6, 7]
                 }
         },
         {
@@ -224,7 +229,7 @@ $(document).ready(function() {
                 text: 'Отчет PDF',
                 messageTop: 'Мониторинг версий ПО МАС ОПС УФПС Липецкой обл.',
                 exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6]
+                        columns: [0, 1, 2, 3, 4, 5, 6, 7]
                 }
         }
 
@@ -278,6 +283,7 @@ $('.edit_modal').click(function(event) {
   	$ustatussdo = $editRow.children('td.ustatussdo').text().trim(); 
    	$ustatusupd = $editRow.children('td.ustatusupd').text().trim();      
    	$ustatusauth = $editRow.children('td.ustatusauth').text().trim(); 
+   	$ustatustrans = $editRow.children('td.ustatustrans').text().trim(); 
 
     console.log('Edit '+$uid+' '+$uname+' '+$ustatus);
     var $editForm = $('#ajaxEditForm');
@@ -287,6 +293,7 @@ $('.edit_modal').click(function(event) {
         $editForm.find('#edit-statussdo').val($ustatussdo);
         $editForm.find('#edit-statusupd').val($ustatusupd);
         $editForm.find('#edit-statusauth').val($ustatusauth);
+        $editForm.find('#edit-statustrans').val($ustatustrans);
 }); //.edit_modal
 
 //Передать данные серверу для записи в БД

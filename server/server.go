@@ -17,15 +17,17 @@ import (
 )
 
 type Nsi struct {
-	ID         uint
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-	DeletedAt  *time.Time
-	Name       string
-	Status     string //:7502 RussianPostEASnsi
-	Statussdo  string //:7522 RussianPostEASsdo
-	Statusupd  string //:7500 RussianPostEASConfiguration
-	Statusauth string //:7501 RussianpostEASuser
+	ID          uint
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   *time.Time
+	Name        string
+	Status      string //:7502 RussianPostEASnsi
+	Statussdo   string //:7522 RussianPostEASsdo
+	Statusupd   string //:7500 RussianPostEASConfiguration
+	Statusauth  string //:7501 RussianpostEASuser
+	Statustrans string //:7524 RussianpostEAStruns
+
 }
 
 var database *sql.DB
@@ -109,8 +111,8 @@ func MCreateHandler(w http.ResponseWriter, r *http.Request) {
 		statussdo := r.FormValue("statussdo")
 		statusupd := r.FormValue("statusupd")
 		statusauth := r.FormValue("statusauth")
-
-		result, err := database.Exec("insert into masops.nsis (name, created_at, updated_at, status, statussdo,statusupd,statusauth) values (?, NOW(), NOW(), ?, ?, ?, ?)", name, status, statussdo, statusupd, statusauth)
+		statustrans := r.FormValue("statustrans")
+		result, err := database.Exec("insert into masops.nsis (name, created_at, updated_at, status, statussdo,statusupd,statusauth,statustrans) values (?, NOW(), NOW(), ?, ?, ?, ?, ?)", name, status, statussdo, statusupd, statusauth, statustrans)
 		if err != nil {
 			//log.Println(err)
 			log.Printf("%s\t%s\t%s\t%s\n", r.RemoteAddr, r.Method, r.URL, err)
@@ -141,9 +143,10 @@ func MEdit(w http.ResponseWriter, r *http.Request) {
 		statussdo := r.FormValue("statussdo")
 		statusupd := r.FormValue("statusupd")
 		statusauth := r.FormValue("statusauth")
+		statustrans := r.FormValue("statustrans")
 
 		//	t := time.Now()
-		_, err = database.Exec("update masops.nsis set status=?, statussdo=?, statusupd=?,statusauth=?, updated_at= NOW() where id = ?", status, statussdo, statusupd, statusauth, id)
+		_, err = database.Exec("update masops.nsis set status=?, statussdo=?, statusupd=?,statusauth=?, statustrans=?, updated_at= NOW() where id = ?", status, statussdo, statusupd, statusauth, statustrans, id)
 
 		if err != nil {
 			log.Printf("%s\t%s\t%s\t%s\n", r.RemoteAddr, r.Method, r.URL, err)
@@ -176,7 +179,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		p := Nsi{}
-		err := rows.Scan(&p.ID, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt, &p.Name, &p.Status, &p.Statussdo, &p.Statusupd, &p.Statusauth)
+		err := rows.Scan(&p.ID, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt, &p.Name, &p.Status, &p.Statussdo, &p.Statusupd, &p.Statusauth, &p.Statustrans)
 		if err != nil {
 			fmt.Println(err)
 			continue

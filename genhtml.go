@@ -16,6 +16,7 @@ func main() {
 "Title": "Заголовок страници",
 "H2": ["Строка 1 заголовка","Строка 2 заголовка"],
 "BtnInsert": "&#9997;ДОБАВИТЬ НОВУЮ ЗАПИСЬ В ЖУРНАЛ",
+"Hcsv": "ID;Time;Name;StatusNSI;Statussdo;Statusupd;Statusauth",
 "Tabheader": [
  {"id": "Id"},
  {"updated": "Время обновления"},
@@ -37,7 +38,8 @@ func main() {
  ],
  "TitleFormCreate": "Добавление новой записи для мониторинга",
  "TitleFormEit": "Добавление новой записи для мониторинга",
- "Columns": "[0, 1 ,2, 3, 4, 5, 6]"
+ "Columns": "[0, 1 ,2, 3, 4, 5, 6]",
+ "Cntcolumns": 7
  }
 `)
 
@@ -180,7 +182,7 @@ $(document).ready(function() {
             "url": "static/DataTables/Russian.json"
         },
           "lengthMenu":[[16,24,50, -1], [16,24, 50, "All"]],
-    dom: 'B<"clear">lfrtip', // all buttons
+    dom: 'B<"clear">lfrtip',
    keys: {
         columns: ':not(:last-child)'
     },
@@ -194,16 +196,9 @@ $(document).ready(function() {
                         columns: {{ $.Columns }}
                 },
                 customize: function (csv) {
-                        //Split the csv to get the rows
                         var split_csv = csv.split("\n");
- 
-                        //Remove the row one to personnalize the headers
-                        split_csv[0] = '
-    {{ range $_, $v := $.Tabheader }}
-		{{- range $_, $v := $v -}}
-           {{"$v"}};
-		{{- end -}}
-    {{ end }}'
+                        split_csv[0] = '{{$.Hcsv}}';
+
                         $.each(split_csv.slice(1), function (index, csv_row) {
                                 var csv_cell_array = csv_row.split('","');
                                 csv_cell_array[0] = csv_cell_array[0].replace(/"/g, '');
@@ -247,7 +242,7 @@ $("#SaveInsertModal").click(function(event) {
     event.preventDefault();
     var form = $('#ajaxCreateForm');
     var method = form.attr('method');
-    var url = form.attr('action'); //mcreate
+    var url = form.attr('action'); <!-- mcreate -->
     var formdata = form.serialize();
     console.log(formdata);
 <!--    ajaxCallRequest(method, url, formdata); -->
@@ -272,18 +267,18 @@ $('.edit_modal').click(function(event) {
  	$editRow = $(event.target ).closest( "tr" );
  	$id = $editRow.data('tr-id');
     {{ range $_, $z := $.Tabtd}}
-		{{- range $k, $v := $z -}}
-	      {{$v}} = $editRow.children('td.{{$v}}').text().trim();
-		{{- end -}}
+	{{- range $k, $v := $z -}}
+          {{"\t"}}{{$v}} = $editRow.children('td.{{$v}}').text().trim();{{"\n"}}
+	{{- end -}}
     {{ end }}
 
     console.log('Edit id='+$id);
     var $editForm = $('#ajaxEditForm');
         $editForm.find('#edit-id').val($id);
     {{ range $_, $z := $.Tabtd }}
-		{{- range $k, $v := $z -}}
-      $editForm.find('#edit-{{$v}}').val({{$v}});
-		{{- end -}}
+	{{- range $k, $v := $z -}}
+           {{"\t"}} $editForm.find('#edit-{{$v}}').val({{$v}});{{"\n"}}
+	{{- end -}}
     {{ end }}
 }); <!--.edit_modal -->
 
@@ -293,7 +288,7 @@ $("#SaveEditModal").click(function(event) {
     event.preventDefault();
     var form = $('#ajaxEditForm');
     var method = form.attr('method');
-    var url = form.attr('action'); //medit
+    var url = form.attr('action'); <!-- medit -->
 <!-- var formdata = $(form).serialize(); -->
 <!-- включаем в список на сериализацию в том числе и поля с атрибутом disabled -->
     var formdata = form.serializeIncludeDisabled();
@@ -342,6 +337,9 @@ function ajaxCallRequest(f_method, f_url, f_data) {
 </script>
 </html>
 `
+type kv struct {
+     k,v string
+}
 
 	m := make(map[string]interface{})
 	if err = json.Unmarshal([]byte(jsonStr), &m); err != nil {
@@ -394,8 +392,14 @@ function ajaxCallRequest(f_method, f_url, f_data) {
 			default:
 				return false
 			}
+
 		},
-	}
+
+		"first": func (n int, sk []string, sv []string) []string { 
+			return sv[0:n]
+                },
+}
+	
 
 	t := template.New("hello").Funcs(tf)
 	tt, err := t.Parse(text1)
