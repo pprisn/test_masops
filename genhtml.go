@@ -2,16 +2,15 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
+	"io"
 	"os"
 	"reflect"
 	"text/template"
 )
 
-func main() {
-	var err error
-
-	jsonStr := []byte(`
+var jsonStr []byte = []byte(`
 {
 "Title": "Заголовок страници",
 "H2": ["Строка 1 заголовка","Строка 2 заголовка"],
@@ -42,6 +41,9 @@ func main() {
  "Cntcolumns": 7
  }
 `)
+
+func main() {
+	var err error
 
 	text1 := `
 <!DOCTYPE html>
@@ -76,21 +78,24 @@ func main() {
 		{{- end -}}
     {{ end }}
        </thead>`
-	text2 := `	{{range . }}
-	<tr data-tr-id={{.ID}}>
-`
+
+	text2 := `
+	{{range . }}
+	<tr data-tr-id={{.ID}}>`
 
 	text3 := `
     {{ range $_, $v := $.Tabtd }}
 		{{- range $k, $v := $v -}}
-	   {{"\t "}}  <td class="{{ $k }}">{{"{{"}} .{{ $v }}{{"}}"}}</td>{{"\n"}}
+			 {{"\t "}}  <td class="{{ $k }}">{{"{{"}} .{{ $v }}{{"}}"}}</td>{{"\n"}}
 		{{- end -}}
     {{ end }}
     <td><a href="#" class="edit_modal" data-toggle="modal" data-target="#editModal">&#9998;</a></td>`
 
-	text4 := `	</tr>
+	text4 := `
+		</tr>
 	{{end}}
-	</table>`
+	</table>
+	`
 
 	text5 := `<!-- CREATE NEW -->
 <div class="modal fade" id="insertModal" tabindex="-1" role="dialog" aria-labelledby="insertModalLabel" aria-hidden="true">
@@ -107,11 +112,10 @@ func main() {
           <div class="form-group">
    {{ range $_, $v := $.Tabheader }}
 		{{- range $k, $v := $v -}}
-          {{"\t "}}<label for="recipient-{{$k}}" class="col-form-label">{{ $v }}:</label> {{"\n"}}
-          {{"\t "}}<input type="text" class="form-control" id="recipient-{{$k}}" name="{{$k}}" value = "New" > {{"\n"}}
+          {{"\t "}}<label for="recipient-{{$k}}" class="col-form-label">{{ $v }}:</label>
+           <input type="text" class="form-control" id="recipient-{{$k}}" name="{{$k}}" value = "New" >{{"\n"}}
 		{{- end -}}
    {{ end }}
-
           </div>
         </form>
       </div>
@@ -138,8 +142,8 @@ func main() {
           <div class="form-group">
    {{ range $_, $v := $.Tabheader }}
 		{{- range $k, $v := $v -}}
-		{{"\t "}}<label for="edit-{{$k}}" class="col-form-label">{{$v}}:</label>{{"\n"}}
-        {{"\t "}}<input type="text" class="form-control" id="edit-{{$k}}" name="{{$k}}" disabled>{{"\n"}}
+		{{"\t "}}<label for="edit-{{$k}}" class="col-form-label">{{$v}}:</label>
+         <input type="text" class="form-control" id="edit-{{$k}}" name="{{$k}}" disabled>{{"\n"}}
 		{{- end -}}
    {{ end }}
          </div>
@@ -337,12 +341,47 @@ function ajaxCallRequest(f_method, f_url, f_data) {
 </script>
 </html>
 `
-type kv struct {
-     k,v string
-}
+	var jsonStrh []byte
+	fileJson := flag.String("-input", "html.json", "Файла в формате json с описанием реквизитов для генерации html")
+	flag.Parse()
+	r, err := os.Open(*fileJson)
+	if err != nil {
+		fmt.Fprint(os.Stdout, `Для работы генератора откорректируйте файл html.json`+"\n")
+		fmt.Fprint(os.Stdout, string(jsonStr))
+		file, err := os.Create("html.json") // создаем файл
+		if err != nil {                     // если возникла ошибка
+			fmt.Println("Unable to create file:", err)
+			os.Exit(1) // выходим из программы
+		}
+		defer file.Close()                // закрываем файл
+		fmt.Fprint(file, string(jsonStr)) // запишем в файл html.json начальную структуру
+		os.Exit(1)                        //выходим из программы
+
+	} else {
+		//
+		defer r.Close()
+		stat, err := r.Stat()
+		if err != nil {
+			panic(err)
+		}
+		//Вычислим размер файла
+		sizeFile := stat.Size()
+		//fmt.Printf("File size is %d \n", sizeFile)
+		//Инициализация объема памяти []byte для считывания данных из файла
+		jsonStrh = make([]byte, sizeFile)
+
+		//Чтение из потока r в массив jsonStrh[:] размером sizeFile
+		_, err = io.ReadFull(r, jsonStrh[:])
+		if err != nil {
+			panic(err)
+		}
+	}
+	type kv struct {
+		k, v string
+	}
 
 	m := make(map[string]interface{})
-	if err = json.Unmarshal([]byte(jsonStr), &m); err != nil {
+	if err = json.Unmarshal([]byte(jsonStrh), &m); err != nil {
 		fmt.Println("Error Unmarshal")
 		panic(err)
 	}
@@ -395,13 +434,12 @@ type kv struct {
 
 		},
 
-		"first": func (n int, sk []string, sv []string) []string { 
+		"first": func(n int, sk []string, sv []string) []string {
 			return sv[0:n]
-                },
-}
-	
+		},
+	}
 
-	t := template.New("hello").Funcs(tf)
+	t := template.New("Generating html page whith Table").Funcs(tf)
 	tt, err := t.Parse(text1)
 	if err != nil {
 		fmt.Println("Error Parse text1")

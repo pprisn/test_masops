@@ -1,3 +1,4 @@
+File size is 1000 
 
 <!DOCTYPE html>
 <html>
@@ -36,7 +37,6 @@
 
        </thead>	{{range . }}
 	<tr data-tr-id={{.ID}}>
-
     	   <td class="id">{{ .ID}}</td>
 	   <td class="updated">{{ .UpdatedAt}}</td>
 	   <td class="name">{{ .Name}}</td>
@@ -45,9 +45,11 @@
 	   <td class="statusupd">{{ .Statusupd}}</td>
 	   <td class="statusauth">{{ .Statusauth}}</td>
 
-    <td><a href="#" class="edit_modal" data-toggle="modal" data-target="#editModal">&#9998;</a></td>	</tr>
+    <td><a href="#" class="edit_modal" data-toggle="modal" data-target="#editModal">&#9998;</a></td>
+		</tr>
 	{{end}}
-	</table><!-- CREATE NEW -->
+	</table>
+	<!-- CREATE NEW -->
 <div class="modal fade" id="insertModal" tabindex="-1" role="dialog" aria-labelledby="insertModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
