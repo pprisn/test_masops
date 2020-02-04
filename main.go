@@ -83,15 +83,16 @@ func main() {
 
 	err = check_nsi(db, f)
 	//return
-	scanner := bufio.NewScanner(f)
+//!	scanner := bufio.NewScanner(f)
 	var nameip string
 	//	d := net.Dialer{Timeout: time.Second * 4}
 
 	// Получить выборку
-	rows, err := db.Raw("select name from nsis").Rows()
+	rows, err := db.Raw("select id, name from nsis").Rows()
 	defer rows.Close()
 
 	var name string
+	var id int
 	//var version string
 	var port string
 	var vStatus7502, vStatus7522, vStatus7500, vStatus7501 , vStatus7524 string
@@ -99,35 +100,35 @@ func main() {
 	var i int = 0
 	for rows.Next() {
 		i = i + 1
-		rows.Scan(&name)
+		rows.Scan(&id,&name)
 		nameip = name
 		vStatus7502, vStatus7522, vStatus7500, vStatus7501 , vStatus7524 = "", "", "", "",""
 		port = "7502"
-		vStatus7502 = checkStatus(i, nameip, port)
+		vStatus7502 = checkStatus(i, id, nameip, port)
 		port = "7522"
-		vStatus7522 = checkStatus(i, nameip, port)
+		vStatus7522 = checkStatus(i, id, nameip, port)
 		port = "7500"
-		vStatus7500 = checkStatus(i, nameip, port)
+		vStatus7500 = checkStatus(i, id, nameip, port)
 		port = "7501"
-		vStatus7501 = checkStatus(i, nameip, port)
+		vStatus7501 = checkStatus(i, id, nameip, port)
 		port = "7524"
-		vStatus7524 = checkStatus(i, nameip, port)
+		vStatus7524 = checkStatus(i, id, nameip, port)
 
 		//db.Model(&n).Where("name = ?", nameip).Update("status", vStatus).Error()
 		db.Exec("UPDATE nsis SET updated_at=NOW(), status=? , statussdo=? , statusupd=? , statusauth=? , statustrans=? WHERE name = ?", vStatus7502, vStatus7522, vStatus7500, vStatus7501, vStatus7524, nameip)
 
 	}
 
-	if err := scanner.Err(); err != nil {
-		fmt.Println(os.Stderr, "reading standard input:", err)
-	}
+//!	if err := scanner.Err(); err != nil {
+//!		fmt.Println(os.Stderr, "reading standard input:", err)
+//!	}
 	t1 := time.Now()
 	log.Printf("СТОП. Время выполнения %v сек.\n", t1.Sub(t0))
 
 }
 
-func checkStatus(i int, ip string, port string) string {
-	fmt.Printf("%d\t%s:%s\n", i, ip, port)
+func checkStatus(i int, id int, ip string, port string) string {
+	fmt.Printf("%d\tid=%d\t%s:%s\n", i,id,ip, port)
 
 	client := http.Client{
 		Timeout: time.Duration(6 * time.Second),
@@ -165,6 +166,73 @@ func checkStatus(i int, ip string, port string) string {
 	}
 
 }
+
+// work() - функция выполнения запроса и получения результата.
+// Результатом работы является запись в структуру значения ID-идентификатора запроса 
+// и результата ответа сервера или 
+// статус прерывания работы при достижении ограничения времени жизни контекста запроса
+// Параметры: 
+// ctx context.Context - контекст запроса
+// id string идентификатор запроса
+// dict *words - указатель на структуру хранения результатов выполнения запросов
+func work(ctx context.Context, id string, dict *words) error {
+	defer wg.Done()
+	//Формируем структуру заголовков запроса
+	tr := &http.Transport{}
+	client := &http.Client{Transport: tr}
+
+	// канал для распаковки данных anonymous struct to pack and unpack data in the channel
+	c := make(chan struct {
+		r   *http.Response
+		err error
+	}, 1)
+
+	req, _ := http.NewRequest("GET", "http://localhost:1111", nil)
+	go func() {
+		resp, err := client.Do(req)
+		fmt.Printf("Doing http request, %s \n",id)
+              
+              //Добавим запись в результат статусов выполнения запросов
+               dict.add(id,"StartWork")
+
+		pack := struct {
+			r   *http.Response
+			err error
+		}{resp, err}
+		c <- pack
+	}()
+	
+        // Кто первый того и тапки...	
+	select {
+	case <-ctx.Done():
+		tr.CancelRequest(req)
+		<-c // Wait for client.Do
+		fmt.Printf("Cancel context, НЕ ДОЖДАЛИСЬ ОТВЕТА СЕРВЕРА на запрос %s\n",id)
+              //Добавим результат выполнения запроса со статусом CancelContext
+               dict.add( id,"CancelContext")
+
+		return ctx.Err()
+	case ok := <-c:
+		err := ok.err
+		resp_ := ok.r
+		if err != nil {
+			fmt.Println("Error ", err)
+			return err
+		}
+		defer resp_.Body.Close()
+		out, _ := ioutil.ReadAll(resp_.Body)
+		fmt.Printf("Server Response %s:  [%s]\n", id,out)
+
+              //Добавим результат выполнения запроса Ответ сервера
+               dict.add(id, string(out))
+
+	}
+    
+	return nil
+}
+
+
+
 
 //функция читает файл со списком адресов , добавляет новые в БД к имеющимся
 func check_nsi(db *gorm.DB, f *os.File) error {

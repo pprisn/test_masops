@@ -1,4 +1,4 @@
-TARGET=test_masops.exe
+TARGET=main.exe
 
 all: clean build
 
