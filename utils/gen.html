@@ -1,4 +1,3 @@
-File size is 1000 
 
 <!DOCTYPE html>
 <html>
@@ -7,10 +6,11 @@ File size is 1000
      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">     
      <title>Заголовок страници</title>
      <!-- Bootstrap CSS -->
-     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<!--     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-     <link rel="stylesheet" href="static/bootstrap-4.3.1-dist/css/bootstrap.min.css">
+-->
+     <link rel="stylesheet" href="static/bootstrap-4.3.1-dist/css/bootstrap.min.css"/>
      <script type="text/javascript" src="static/jquery/jquery-3.4.1.min.js"></script>
      <script type="text/javascript" src="static/popper/popper.min.js"></script>
      <script type="text/javascript" src="static/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
@@ -21,9 +21,9 @@ File size is 1000
     </head>
     <body>
        <div id="overlay"></div><!-- Пoдлoжкa, oднa нa всю стрaницу -->                   
-       <h2 class="text-primary" >[Строка 1 заголовка Строка 2 заголовка]</h2>
+       <h2 class="text-primary" >Мониторинг версий ПО МАС ОПС УФПС Липецкой обл.</h2>
        <p> <button type="button" class="btn btn-light" data-toggle="modal" data-target="#insertModal" 
-                data-whatever="@Какието данные">&#9997;ДОБАВИТЬ НОВУЮ ЗАПИСЬ В ЖУРНАЛ/button> </p>
+                data-whatever="@Какието данные">&#9997;ДОБАВИТЬ НОВУЮ ЗАПИСЬ В ЖУРНАЛ</button> </p>
        <table id="myTable" class="cell-border compact stripe  buttons"> <!-- responsive -->
        <thead>
     	<th>Id</th>
@@ -33,145 +33,135 @@ File size is 1000
 	<th>Russian Post EAS sdo</th>
 	<th>Russian Post EAS Configuration</th>
 	<th>Russian Post EAS user</th>
+	<th>Russian Post EAS trans</th>
 	<th></th>
 
-       </thead>	{{range . }}
+       </thead>
+	{{range . }}
 	<tr data-tr-id={{.ID}}>
-    	   <td class="id">{{ .ID}}</td>
-	   <td class="updated">{{ .UpdatedAt}}</td>
-	   <td class="name">{{ .Name}}</td>
-	   <td class="status">{{ .Status}}</td>
-	   <td class="statussdo">{{ .Statussdo}}</td>
-	   <td class="statusupd">{{ .Statusupd}}</td>
-	   <td class="statusauth">{{ .Statusauth}}</td>
+    	   <td class="id">{{.ID}}</td>
+	   <td class="updated">{{.UpdatedAt}}</td>
+	   <td class="name">{{.Name}}</td>
+	   <td class="status">{{.Status}}</td>
+	   <td class="statussdo">{{.Statussdo}}</td>
+	   <td class="statusupd">{{.Statusupd}}</td>
+	   <td class="statusauth">{{.Statusauth}}</td>
+	   <td class="statustrans">{{.Statustrans}}</td>
 
     <td><a href="#" class="edit_modal" data-toggle="modal" data-target="#editModal">&#9998;</a></td>
 		</tr>
 	{{end}}
 	</table>
 	<!-- CREATE NEW -->
-<div class="modal fade" id="insertModal" tabindex="-1" role="dialog" aria-labelledby="insertModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="insertModalLabel">Добавление новой записи для мониторинга/h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="ajaxCreateForm" method="POST" action='mcreate' >
-          <div class="form-group">
-   	 <label for="recipient-id" class="col-form-label">Id:</label> 
+	<div class="modal fade" id="insertModal" tabindex="-1" role="dialog" aria-labelledby="insertModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="insertModalLabel">Добавление новой записи для мониторинга</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	        </div>
+	         <div class="modal-body">
+  		    <form id="ajaxCreateForm" method="POST" action='mcreate' >
+		        <div class="form-group">
+			<label for="recipient-id" class="col-form-label">Id:</label>
+			<input type="text" class="form-control" id="recipient-id" name="id" value = "New" >
+			<label for="recipient-updated" class="col-form-label">Время обновления:</label>
+			<input type="text" class="form-control" id="recipient-updated" name="updated" value = "New" >
+			<label for="recipient-name" class="col-form-label">Имя:</label>
+			<input type="text" class="form-control" id="recipient-name" name="name" value = "New" >
+			<label for="recipient-status" class="col-form-label">Russian Post EAS nsi:</label>
+			<input type="text" class="form-control" id="recipient-status" name="status" value = "New" >
+			<label for="recipient-statussdo" class="col-form-label">Russian Post EAS sdo:</label>
+			<input type="text" class="form-control" id="recipient-statussdo" name="statussdo" value = "New" >
+			<label for="recipient-statusupd" class="col-form-label">Russian Post EAS Configuration:</label>
+			<input type="text" class="form-control" id="recipient-statusupd" name="statusupd" value = "New" >
+			<label for="recipient-statusauth" class="col-form-label">Russian Post EAS user:</label>
+			<input type="text" class="form-control" id="recipient-statusauth" name="statusauth" value = "New" >
+			<label for="recipient-statustrans" class="col-form-label">Russian Post EAS trans:</label>
+			<input type="text" class="form-control" id="recipient-statustrans" name="statustrans" value = "New" >
+			<label for="recipient-th" class="col-form-label">:</label>
+			<input type="text" class="form-control" id="recipient-th" name="th" value = "New" >
 
-          	 <input type="text" class="form-control" id="recipient-id" name="id" value = "New" > 
-	 <label for="recipient-updated" class="col-form-label">Время обновления:</label> 
-
-          	 <input type="text" class="form-control" id="recipient-updated" name="updated" value = "New" > 
-	 <label for="recipient-name" class="col-form-label">Имя:</label> 
-
-          	 <input type="text" class="form-control" id="recipient-name" name="name" value = "New" > 
-	 <label for="recipient-status" class="col-form-label">Russian Post EAS nsi:</label> 
-
-          	 <input type="text" class="form-control" id="recipient-status" name="status" value = "New" > 
-	 <label for="recipient-statussdo" class="col-form-label">Russian Post EAS sdo:</label> 
-
-          	 <input type="text" class="form-control" id="recipient-statussdo" name="statussdo" value = "New" > 
-	 <label for="recipient-statusupd" class="col-form-label">Russian Post EAS Configuration:</label> 
-
-          	 <input type="text" class="form-control" id="recipient-statusupd" name="statusupd" value = "New" > 
-	 <label for="recipient-statusauth" class="col-form-label">Russian Post EAS user:</label> 
-
-          	 <input type="text" class="form-control" id="recipient-statusauth" name="statusauth" value = "New" > 
-	 <label for="recipient-th" class="col-form-label">:</label> 
-
-          	 <input type="text" class="form-control" id="recipient-th" name="th" value = "New" > 
-
-
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Выйти</button>
-        <button type="button" class="btn btn-primary" id="SaveInsertModal" >Записать</button>
-      </div>
-    </div>
-  </div>
-</div>
+	         	</div>
+		    </form>
+	      </div>
+	      <div class="modal-footer">
+        	<button type="button" class="btn btn-secondary" data-dismiss="modal">Выйти</button>
+	        <button type="button" class="btn btn-primary" id="SaveInsertModal" >Записать</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
 
 <!-- EDIT RECORDS -->
-<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editModalLabel"><no value>Редактирование данных</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="ajaxEditForm" method="POST" action='medit' >
-          <div class="form-group">
-   	 <label for="edit-id" class="col-form-label">Id:</label>
+	<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="editModalLabel">Редактирование записи</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+		        </button>
+	      </div>
+	      <div class="modal-body">
+	        <form id="ajaxEditForm" method="POST" action='medit' >
+        	  <div class="form-group">
+			<label for="edit-id" class="col-form-label">Id:</label>
+			<input type="text" class="form-control" id="edit-id" name="id" disabled>
+			<label for="edit-updated" class="col-form-label">Время обновления:</label>
+			<input type="text" class="form-control" id="edit-updated" name="updated" disabled>
+			<label for="edit-name" class="col-form-label">Имя:</label>
+			<input type="text" class="form-control" id="edit-name" name="name" disabled>
+			<label for="edit-status" class="col-form-label">Russian Post EAS nsi:</label>
+			<input type="text" class="form-control" id="edit-status" name="status" disabled>
+			<label for="edit-statussdo" class="col-form-label">Russian Post EAS sdo:</label>
+			<input type="text" class="form-control" id="edit-statussdo" name="statussdo" disabled>
+			<label for="edit-statusupd" class="col-form-label">Russian Post EAS Configuration:</label>
+			<input type="text" class="form-control" id="edit-statusupd" name="statusupd" disabled>
+			<label for="edit-statusauth" class="col-form-label">Russian Post EAS user:</label>
+			<input type="text" class="form-control" id="edit-statusauth" name="statusauth" disabled>
+			<label for="edit-statustrans" class="col-form-label">Russian Post EAS trans:</label>
+			<input type="text" class="form-control" id="edit-statustrans" name="statustrans" disabled>
+			<label for="edit-th" class="col-form-label">:</label>
+			<input type="text" class="form-control" id="edit-th" name="th" disabled>
 
-        	 <input type="text" class="form-control" id="edit-id" name="id" disabled>
-	 <label for="edit-updated" class="col-form-label">Время обновления:</label>
-
-        	 <input type="text" class="form-control" id="edit-updated" name="updated" disabled>
-	 <label for="edit-name" class="col-form-label">Имя:</label>
-
-        	 <input type="text" class="form-control" id="edit-name" name="name" disabled>
-	 <label for="edit-status" class="col-form-label">Russian Post EAS nsi:</label>
-
-        	 <input type="text" class="form-control" id="edit-status" name="status" disabled>
-	 <label for="edit-statussdo" class="col-form-label">Russian Post EAS sdo:</label>
-
-        	 <input type="text" class="form-control" id="edit-statussdo" name="statussdo" disabled>
-	 <label for="edit-statusupd" class="col-form-label">Russian Post EAS Configuration:</label>
-
-        	 <input type="text" class="form-control" id="edit-statusupd" name="statusupd" disabled>
-	 <label for="edit-statusauth" class="col-form-label">Russian Post EAS user:</label>
-
-        	 <input type="text" class="form-control" id="edit-statusauth" name="statusauth" disabled>
-	 <label for="edit-th" class="col-form-label">:</label>
-
-        	 <input type="text" class="form-control" id="edit-th" name="th" disabled>
-
-         </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Выйти</button>
-        <button type="button" class="btn btn-primary" id="SaveEditModal" >Записать</button>
-      </div>
+	          </div>
+	        </form>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal">Выйти</button>
+	        <button type="button" class="btn btn-primary" id="SaveEditModal" >Записать</button>
+	      </div>
 <!-- ДЛЯ ОТЛАДКИ просмотра ЗАПРОСОВ
-  <div class="container">
-    <div class="well col-xs-12">
-      <div class="control-label col-xs-12">
-        <label>Data sent:</label>
-      </div>
-      <div class="col-xs-12">
-        <textarea class="form-control" readonly id="dataSent">here: data sent...</textarea>
-        <br>
-      </div>
-      <div class="control-label col-xs-12">
-        <label>Result:</label>
-      </div>
-      <div class="col-xs-12">
-        <textarea class="form-control" readonly id="results">Waiting to send request</textarea>
-      </div>
-    </div>
-  </div>
+	  <div class="container">
+	    <div class="well col-xs-12">
+	      <div class="control-label col-xs-12">
+	        <label>Data sent:</label>
+	      </div>
+	      <div class="col-xs-12">
+	        <textarea class="form-control" readonly id="dataSent">here: data sent...</textarea>
+	        <br>
+	      </div>
+	      <div class="control-label col-xs-12">
+	        <label>Result:</label>
+	      </div>
+	      <div class="col-xs-12">
+	        <textarea class="form-control" readonly id="results">Waiting to send request</textarea>
+	      </div>
+	    </div>
+	  </div>
 -->
-    </div>
-  </div>
-</div>
+	    </div>
+	  </div>
+	</div>
 
 </body>
 
 <script>
 $(document).ready(function() {
-
+  var $cnt = 7
   var table = $('#myTable').DataTable({
         "language": {
             "url": "static/DataTables/Russian.json"
@@ -188,16 +178,16 @@ $(document).ready(function() {
                 extend: 'csv',
                 text: 'Отчет CSV',
                 exportOptions: {
-                        columns: [0, 1 ,2, 3, 4, 5, 6]
+                        columns: [0, 1 ,2, 3, 4, 5, 6, 7]
                 },
                 customize: function (csv) {
                         var split_csv = csv.split("\n");
-                        split_csv[0] = 'ID;Time;Name;StatusNSI;Statussdo;Statusupd;Statusauth';
+                        split_csv[0] = 'ID;Time;Name;StatusNSI;Statussdo;Statusupd;Statusauth;Statustrans';
 
                         $.each(split_csv.slice(1), function (index, csv_row) {
                                 var csv_cell_array = csv_row.split('","');
                                 csv_cell_array[0] = csv_cell_array[0].replace(/"/g, '');
-                                csv_cell_array[3] = csv_cell_array[3].replace(/"/g, '');
+                                csv_cell_array[$cnt] = csv_cell_array[$cnt].replace(/"/g, '');
                                 csv_cell_array_quotes = '"' + csv_cell_array.join('";"') + '"';
                                 split_csv[index + 1] = csv_cell_array_quotes;
                         });
@@ -212,7 +202,7 @@ $(document).ready(function() {
                 filename: 'file_excel',
                 text: 'Отчет EXCEL',
                 exportOptions: {
-                        columns: [0, 1 ,2, 3, 4, 5, 6]
+                        columns: [0, 1 ,2, 3, 4, 5, 6, 7]
                 }
         },
         {
@@ -221,7 +211,7 @@ $(document).ready(function() {
                 text: 'Отчет PDF',
                 messageTop: 'Мониторинг версий ПО МАС ОПС УФПС Липецкой обл.',
                 exportOptions: {
-                        columns: [0, 1 ,2, 3, 4, 5, 6]
+                        columns: [0, 1 ,2, 3, 4, 5, 6, 7]
                 }
         }
 
@@ -261,25 +251,27 @@ $('.edit_modal').click(function(event) {
 <!--    получим значения из таблици -->
  	$editRow = $(event.target ).closest( "tr" );
  	$id = $editRow.data('tr-id');
-    	ID = $editRow.children('td.ID').text().trim();
-	UpdatedAt = $editRow.children('td.UpdatedAt').text().trim();
-	Name = $editRow.children('td.Name').text().trim();
-	Status = $editRow.children('td.Status').text().trim();
-	Statussdo = $editRow.children('td.Statussdo').text().trim();
-	Statusupd = $editRow.children('td.Statusupd').text().trim();
-	Statusauth = $editRow.children('td.Statusauth').text().trim();
+    	id = $editRow.children('td.id').text().trim();
+	updated = $editRow.children('td.updated').text().trim();
+	name = $editRow.children('td.name').text().trim();
+	status = $editRow.children('td.status').text().trim();
+	statussdo = $editRow.children('td.statussdo').text().trim();
+	statusupd = $editRow.children('td.statusupd').text().trim();
+	statusauth = $editRow.children('td.statusauth').text().trim();
+	statustrans = $editRow.children('td.statustrans').text().trim();
 
 
     console.log('Edit id='+$id);
     var $editForm = $('#ajaxEditForm');
         $editForm.find('#edit-id').val($id);
-    	 $editForm.find('#edit-ID').val(ID);
-	 $editForm.find('#edit-UpdatedAt').val(UpdatedAt);
-	 $editForm.find('#edit-Name').val(Name);
-	 $editForm.find('#edit-Status').val(Status);
-	 $editForm.find('#edit-Statussdo').val(Statussdo);
-	 $editForm.find('#edit-Statusupd').val(Statusupd);
-	 $editForm.find('#edit-Statusauth').val(Statusauth);
+    	 $editForm.find('#edit-id').val(id);
+	 $editForm.find('#edit-updated').val(updated);
+	 $editForm.find('#edit-name').val(name);
+	 $editForm.find('#edit-status').val(status);
+	 $editForm.find('#edit-statussdo').val(statussdo);
+	 $editForm.find('#edit-statusupd').val(statusupd);
+	 $editForm.find('#edit-statusauth').val(statusauth);
+	 $editForm.find('#edit-statustrans').val(statustrans);
 
 }); <!--.edit_modal -->
 

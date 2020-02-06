@@ -13,9 +13,9 @@ import (
 var jsonStr []byte = []byte(`
 {
 "Title": "Заголовок страници",
-"H2": ["Строка 1 заголовка","Строка 2 заголовка"],
+"H2": "Строка 1 заголовка","Строка 2 заголовка",
 "BtnInsert": "&#9997;ДОБАВИТЬ НОВУЮ ЗАПИСЬ В ЖУРНАЛ",
-"Hcsv": "ID;Time;Name;StatusNSI;Statussdo;Statusupd;Statusauth",
+"Hcsv": "ID;Time;Name;StatusNSI;Statussdo;Statusupd;Statusauth;Statustrans",
 "Tabheader": [
  {"id": "Id"},
  {"updated": "Время обновления"},
@@ -24,6 +24,7 @@ var jsonStr []byte = []byte(`
  {"statussdo": "Russian Post EAS sdo"},
  {"statusupd": "Russian Post EAS Configuration"},
  {"statusauth": "Russian Post EAS user"},
+ {"statustrans": "Russian Post EAS trans"},
  {"th": ""}
  ],
  "Tabtd": [
@@ -33,11 +34,12 @@ var jsonStr []byte = []byte(`
  {"status": "Status"},
  {"statussdo": "Statussdo"},
  {"statusupd": "Statusupd"},
- {"statusauth": "Statusauth"}
+ {"statusauth": "Statusauth"},
+ {"statustrans": "Statustrans"}
  ],
  "TitleFormCreate": "Добавление новой записи для мониторинга",
- "TitleFormEit": "Добавление новой записи для мониторинга",
- "Columns": "[0, 1 ,2, 3, 4, 5, 6]",
+ "TitleFormEdit": "Редактирование записи",
+ "Columns": "[0, 1 ,2, 3, 4, 5, 6, 7]",
  "Cntcolumns": 7
  }
 `)
@@ -53,10 +55,11 @@ func main() {
      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">     
      <title>{{$.Title}}</title>
      <!-- Bootstrap CSS -->
-     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<!--     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-     <link rel="stylesheet" href="static/bootstrap-4.3.1-dist/css/bootstrap.min.css">
+-->
+     <link rel="stylesheet" href="static/bootstrap-4.3.1-dist/css/bootstrap.min.css"/>
      <script type="text/javascript" src="static/jquery/jquery-3.4.1.min.js"></script>
      <script type="text/javascript" src="static/popper/popper.min.js"></script>
      <script type="text/javascript" src="static/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
@@ -69,7 +72,7 @@ func main() {
        <div id="overlay"></div><!-- Пoдлoжкa, oднa нa всю стрaницу -->                   
        <h2 class="text-primary" >{{$.H2}}</h2>
        <p> <button type="button" class="btn btn-light" data-toggle="modal" data-target="#insertModal" 
-                data-whatever="@Какието данные">{{.BtnInsert}}/button> </p>
+                data-whatever="@Какието данные">{{.BtnInsert}}</button> </p>
        <table id="myTable" class="cell-border compact stripe  buttons"> <!-- responsive -->
        <thead>
     {{ range $_, $v := $.Tabheader }}
@@ -82,11 +85,10 @@ func main() {
 	text2 := `
 	{{range . }}
 	<tr data-tr-id={{.ID}}>`
-
 	text3 := `
     {{ range $_, $v := $.Tabtd }}
 		{{- range $k, $v := $v -}}
-			 {{"\t "}}  <td class="{{ $k }}">{{"{{"}} .{{ $v }}{{"}}"}}</td>{{"\n"}}
+		{{"\t "}}  <td class="{{ $k }}">{{"{{"}}.{{$v}}{{"}}"}}</td>{{"\n"}}
 		{{- end -}}
     {{ end }}
     <td><a href="#" class="edit_modal" data-toggle="modal" data-target="#editModal">&#9998;</a></td>`
@@ -98,89 +100,89 @@ func main() {
 	`
 
 	text5 := `<!-- CREATE NEW -->
-<div class="modal fade" id="insertModal" tabindex="-1" role="dialog" aria-labelledby="insertModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="insertModalLabel">{{.TitleFormCreate}}/h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="ajaxCreateForm" method="POST" action='mcreate' >
-          <div class="form-group">
-   {{ range $_, $v := $.Tabheader }}
-		{{- range $k, $v := $v -}}
-          {{"\t "}}<label for="recipient-{{$k}}" class="col-form-label">{{ $v }}:</label>
-           <input type="text" class="form-control" id="recipient-{{$k}}" name="{{$k}}" value = "New" >{{"\n"}}
-		{{- end -}}
-   {{ end }}
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Выйти</button>
-        <button type="button" class="btn btn-primary" id="SaveInsertModal" >Записать</button>
-      </div>
-    </div>
-  </div>
-</div>
+	<div class="modal fade" id="insertModal" tabindex="-1" role="dialog" aria-labelledby="insertModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="insertModalLabel">{{.TitleFormCreate}}</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	        </div>
+	         <div class="modal-body">
+  		    <form id="ajaxCreateForm" method="POST" action='mcreate' >
+		        <div class="form-group">
+{{ range $_, $v := $.Tabheader }}
+{{- range $k, $v := $v -}}
+{{"\t\t\t"}}<label for="recipient-{{$k}}" class="col-form-label">{{ $v }}:</label>
+{{"\t\t\t"}}<input type="text" class="form-control" id="recipient-{{$k}}" name="{{$k}}" value = "New" >{{"\n"}}
+{{- end -}}
+{{ end }}
+	         	</div>
+		    </form>
+	      </div>
+	      <div class="modal-footer">
+        	<button type="button" class="btn btn-secondary" data-dismiss="modal">Выйти</button>
+	        <button type="button" class="btn btn-primary" id="SaveInsertModal" >Записать</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
 
 <!-- EDIT RECORDS -->
-<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editModalLabel">{{$.TitleFormEdit}}Редактирование данных</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="ajaxEditForm" method="POST" action='medit' >
-          <div class="form-group">
-   {{ range $_, $v := $.Tabheader }}
-		{{- range $k, $v := $v -}}
-		{{"\t "}}<label for="edit-{{$k}}" class="col-form-label">{{$v}}:</label>
-         <input type="text" class="form-control" id="edit-{{$k}}" name="{{$k}}" disabled>{{"\n"}}
-		{{- end -}}
-   {{ end }}
-         </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Выйти</button>
-        <button type="button" class="btn btn-primary" id="SaveEditModal" >Записать</button>
-      </div>
+	<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="editModalLabel">{{$.TitleFormEdit}}</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+		        </button>
+	      </div>
+	      <div class="modal-body">
+	        <form id="ajaxEditForm" method="POST" action='medit' >
+        	  <div class="form-group">
+{{ range $_, $v := $.Tabheader }}
+{{- range $k, $v := $v -}}
+{{"\t\t\t"}}<label for="edit-{{$k}}" class="col-form-label">{{$v}}:</label>
+{{"\t\t\t"}}<input type="text" class="form-control" id="edit-{{$k}}" name="{{$k}}" disabled>{{"\n"}}
+{{- end -}}
+{{ end }}
+	          </div>
+	        </form>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal">Выйти</button>
+	        <button type="button" class="btn btn-primary" id="SaveEditModal" >Записать</button>
+	      </div>
 <!-- ДЛЯ ОТЛАДКИ просмотра ЗАПРОСОВ
-  <div class="container">
-    <div class="well col-xs-12">
-      <div class="control-label col-xs-12">
-        <label>Data sent:</label>
-      </div>
-      <div class="col-xs-12">
-        <textarea class="form-control" readonly id="dataSent">here: data sent...</textarea>
-        <br>
-      </div>
-      <div class="control-label col-xs-12">
-        <label>Result:</label>
-      </div>
-      <div class="col-xs-12">
-        <textarea class="form-control" readonly id="results">Waiting to send request</textarea>
-      </div>
-    </div>
-  </div>
+	  <div class="container">
+	    <div class="well col-xs-12">
+	      <div class="control-label col-xs-12">
+	        <label>Data sent:</label>
+	      </div>
+	      <div class="col-xs-12">
+	        <textarea class="form-control" readonly id="dataSent">here: data sent...</textarea>
+	        <br>
+	      </div>
+	      <div class="control-label col-xs-12">
+	        <label>Result:</label>
+	      </div>
+	      <div class="col-xs-12">
+	        <textarea class="form-control" readonly id="results">Waiting to send request</textarea>
+	      </div>
+	    </div>
+	  </div>
 -->
-    </div>
-  </div>
-</div>
+	    </div>
+	  </div>
+	</div>
 
 </body>
 
 <script>
 $(document).ready(function() {
-
+  var $cnt = {{$.Cntcolumns}}
   var table = $('#myTable').DataTable({
         "language": {
             "url": "static/DataTables/Russian.json"
@@ -206,7 +208,7 @@ $(document).ready(function() {
                         $.each(split_csv.slice(1), function (index, csv_row) {
                                 var csv_cell_array = csv_row.split('","');
                                 csv_cell_array[0] = csv_cell_array[0].replace(/"/g, '');
-                                csv_cell_array[3] = csv_cell_array[3].replace(/"/g, '');
+                                csv_cell_array[$cnt] = csv_cell_array[$cnt].replace(/"/g, '');
                                 csv_cell_array_quotes = '"' + csv_cell_array.join('";"') + '"';
                                 split_csv[index + 1] = csv_cell_array_quotes;
                         });
@@ -272,7 +274,7 @@ $('.edit_modal').click(function(event) {
  	$id = $editRow.data('tr-id');
     {{ range $_, $z := $.Tabtd}}
 	{{- range $k, $v := $z -}}
-          {{"\t"}}{{$v}} = $editRow.children('td.{{$v}}').text().trim();{{"\n"}}
+          {{"\t"}}{{$k}} = $editRow.children('td.{{$k}}').text().trim();{{"\n"}}
 	{{- end -}}
     {{ end }}
 
@@ -281,7 +283,7 @@ $('.edit_modal').click(function(event) {
         $editForm.find('#edit-id').val($id);
     {{ range $_, $z := $.Tabtd }}
 	{{- range $k, $v := $z -}}
-           {{"\t"}} $editForm.find('#edit-{{$v}}').val({{$v}});{{"\n"}}
+           {{"\t"}} $editForm.find('#edit-{{$k}}').val({{$k}});{{"\n"}}
 	{{- end -}}
     {{ end }}
 }); <!--.edit_modal -->
@@ -376,6 +378,7 @@ function ajaxCallRequest(f_method, f_url, f_data) {
 			panic(err)
 		}
 	}
+
 	type kv struct {
 		k, v string
 	}

@@ -46,6 +46,7 @@ type Nsi struct {
 	Statusupd  string `gorm:"type:varchar(255)"` //:7500
 	Statusauth string `gorm:"type:varchar(255)"` //:7501
 	Statustrans string `gorm:"type:varchar(255)"` //:7524
+	Note string `gorm:"type:varchar(255)"` //
 }
 
 func main() {
@@ -166,71 +167,6 @@ func checkStatus(i int, id int, ip string, port string) string {
 	}
 
 }
-
-// work() - функция выполнения запроса и получения результата.
-// Результатом работы является запись в структуру значения ID-идентификатора запроса 
-// и результата ответа сервера или 
-// статус прерывания работы при достижении ограничения времени жизни контекста запроса
-// Параметры: 
-// ctx context.Context - контекст запроса
-// id string идентификатор запроса
-// dict *words - указатель на структуру хранения результатов выполнения запросов
-func work(ctx context.Context, id string, dict *words) error {
-	defer wg.Done()
-	//Формируем структуру заголовков запроса
-	tr := &http.Transport{}
-	client := &http.Client{Transport: tr}
-
-	// канал для распаковки данных anonymous struct to pack and unpack data in the channel
-	c := make(chan struct {
-		r   *http.Response
-		err error
-	}, 1)
-
-	req, _ := http.NewRequest("GET", "http://localhost:1111", nil)
-	go func() {
-		resp, err := client.Do(req)
-		fmt.Printf("Doing http request, %s \n",id)
-              
-              //Добавим запись в результат статусов выполнения запросов
-               dict.add(id,"StartWork")
-
-		pack := struct {
-			r   *http.Response
-			err error
-		}{resp, err}
-		c <- pack
-	}()
-	
-        // Кто первый того и тапки...	
-	select {
-	case <-ctx.Done():
-		tr.CancelRequest(req)
-		<-c // Wait for client.Do
-		fmt.Printf("Cancel context, НЕ ДОЖДАЛИСЬ ОТВЕТА СЕРВЕРА на запрос %s\n",id)
-              //Добавим результат выполнения запроса со статусом CancelContext
-               dict.add( id,"CancelContext")
-
-		return ctx.Err()
-	case ok := <-c:
-		err := ok.err
-		resp_ := ok.r
-		if err != nil {
-			fmt.Println("Error ", err)
-			return err
-		}
-		defer resp_.Body.Close()
-		out, _ := ioutil.ReadAll(resp_.Body)
-		fmt.Printf("Server Response %s:  [%s]\n", id,out)
-
-              //Добавим результат выполнения запроса Ответ сервера
-               dict.add(id, string(out))
-
-	}
-    
-	return nil
-}
-
 
 
 
