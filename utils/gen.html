@@ -4,7 +4,7 @@
     <head>
      <meta charset="UTF-8">
      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">     
-     <title>Заголовок страници</title>
+     <title>Monitoring MASOPS</title>
      <!-- Bootstrap CSS -->
 <!--     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
@@ -34,6 +34,7 @@
 	<th>Russian Post EAS Configuration</th>
 	<th>Russian Post EAS user</th>
 	<th>Russian Post EAS trans</th>
+	<th>Примечание</th>
 	<th></th>
 
        </thead>
@@ -47,6 +48,7 @@
 	   <td class="statusupd">{{.Statusupd}}</td>
 	   <td class="statusauth">{{.Statusauth}}</td>
 	   <td class="statustrans">{{.Statustrans}}</td>
+	   <td class="note">{{.Note}}</td>
 
     <td><a href="#" class="edit_modal" data-toggle="modal" data-target="#editModal">&#9998;</a></td>
 		</tr>
@@ -80,6 +82,8 @@
 			<label for="recipient-statusauth" class="col-form-label">Russian Post EAS user:</label>
 			<input type="text" class="form-control" id="recipient-statusauth" name="statusauth" value = "New" >
 			<label for="recipient-statustrans" class="col-form-label">Russian Post EAS trans:</label>
+			<input type="text" class="form-control" id="recipient-statustrans" name="statustrans" value = "New" >
+			<label for="recipient-statustrans" class="col-form-label">Примечание:</label>
 			<input type="text" class="form-control" id="recipient-statustrans" name="statustrans" value = "New" >
 			<label for="recipient-th" class="col-form-label">:</label>
 			<input type="text" class="form-control" id="recipient-th" name="th" value = "New" >
@@ -124,6 +128,8 @@
 			<input type="text" class="form-control" id="edit-statusauth" name="statusauth" disabled>
 			<label for="edit-statustrans" class="col-form-label">Russian Post EAS trans:</label>
 			<input type="text" class="form-control" id="edit-statustrans" name="statustrans" disabled>
+			<label for="edit-statustrans" class="col-form-label">Примечание:</label>
+			<input type="text" class="form-control" id="edit-statustrans" name="statustrans" disabled>
 			<label for="edit-th" class="col-form-label">:</label>
 			<input type="text" class="form-control" id="edit-th" name="th" disabled>
 
@@ -161,7 +167,7 @@
 
 <script>
 $(document).ready(function() {
-  var $cnt = 7
+  var $cnt = 8
   var table = $('#myTable').DataTable({
         "language": {
             "url": "static/DataTables/Russian.json"
@@ -178,11 +184,11 @@ $(document).ready(function() {
                 extend: 'csv',
                 text: 'Отчет CSV',
                 exportOptions: {
-                        columns: [0, 1 ,2, 3, 4, 5, 6, 7]
+                        columns: [0, 1 ,2, 3, 4, 5, 6, 8]
                 },
                 customize: function (csv) {
                         var split_csv = csv.split("\n");
-                        split_csv[0] = 'ID;Time;Name;StatusNSI;Statussdo;Statusupd;Statusauth;Statustrans';
+                        split_csv[0] = 'ID;Time;Name;StatusNSI;Statussdo;Statusupd;Statusauth;Statustrans;Note';
 
                         $.each(split_csv.slice(1), function (index, csv_row) {
                                 var csv_cell_array = csv_row.split('","');
@@ -202,7 +208,7 @@ $(document).ready(function() {
                 filename: 'file_excel',
                 text: 'Отчет EXCEL',
                 exportOptions: {
-                        columns: [0, 1 ,2, 3, 4, 5, 6, 7]
+                        columns: [0, 1 ,2, 3, 4, 5, 6, 8]
                 }
         },
         {
@@ -211,7 +217,7 @@ $(document).ready(function() {
                 text: 'Отчет PDF',
                 messageTop: 'Мониторинг версий ПО МАС ОПС УФПС Липецкой обл.',
                 exportOptions: {
-                        columns: [0, 1 ,2, 3, 4, 5, 6, 7]
+                        columns: [0, 1 ,2, 3, 4, 5, 6, 8]
                 }
         }
 
@@ -259,6 +265,7 @@ $('.edit_modal').click(function(event) {
 	statusupd = $editRow.children('td.statusupd').text().trim();
 	statusauth = $editRow.children('td.statusauth').text().trim();
 	statustrans = $editRow.children('td.statustrans').text().trim();
+	note = $editRow.children('td.note').text().trim();
 
 
     console.log('Edit id='+$id);
@@ -272,6 +279,7 @@ $('.edit_modal').click(function(event) {
 	 $editForm.find('#edit-statusupd').val(statusupd);
 	 $editForm.find('#edit-statusauth').val(statusauth);
 	 $editForm.find('#edit-statustrans').val(statustrans);
+	 $editForm.find('#edit-note').val(note);
 
 }); <!--.edit_modal -->
 

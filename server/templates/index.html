@@ -20,8 +20,29 @@
      <script type="text/javascript" src="static/DataTables/datatables.min.js"></script>
 
     </head>
-    <body>
-        <div id="overlay"></div><!-- Пoдлoжкa, oднa нa всю стрaницу -->                   
+
+<body>
+
+<!--
+<div class="container-fluid">
+  <div class="row-fluid">
+    <div class="span2">
+      <!--Sidebar content
+
+<select class="custom-select" multiple>
+  <option selected>Open this select menu</option>
+  <option value="1">R00</option>
+  <option value="2">R01</option>
+  <option value="3">R02</option>
+</select>
+
+    </div>
+
+    <div class="span10">
+-->
+<!--   <div id="overlay"></div><!-- Пoдлoжкa, oднa нa всю стрaницу -->                   
+
+      <!--Body content-->
         <h2 class="text-primary" >Мониторинг версий ПО МАС ОПС УФПС Липецкой обл.</h2>
         <!-- <p><a href="/create">Добавить</a></p> -->
         <!--        <p><a href="/demo">Демо</a></p> -->
@@ -34,6 +55,7 @@
        <table id="myTable" class="cell-border compact stripe  buttons"> <!-- responsive -->
             <thead><th>Id</th><th>Время обновления</th><th>Имя</th><th>Russian Post EAS nsi</th><th>Russian Post EAS sdo</th>
                     <th>Russian Post EAS Configuration</th><th>Russian Post EAS user</th><th>Russian Post EAS trans</th><th>Примечание</th><th></th></thead>
+<tbody>
             {{range . }}
             <tr data-tr-id={{.ID}}>
                 <td class="uid"> {{.ID}}</td>
@@ -51,6 +73,20 @@
              -->
             </tr>
             {{end}}
+</tbody>
+  <tfoot class="text-primary">
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+    </tfoot>
         </table>
 
 <!-- CREATE NEW -->
@@ -151,12 +187,54 @@
   </div>
 </div>
 
+<!--
+
+    </div>
+  </div>
+</div>
+-->
+
 </body>
+
 
 <script>
 $(document).ready(function() {
 
+
+// Setup - add a text input to each header cell
+
+ // Setup - add a text input to each footer cell
+    $('#myTable tfoot th').each( function () {
+        var title = $(this).text();
+        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+    } );
+
+  
+  // DataTable
   var table = $('#myTable').DataTable({
+
+   initComplete: function () {
+            this.api().columns().every( function () {
+                var column = this;
+                var select = $('<select><option value=""></option></select>')
+                    .appendTo( $(column.footer()).empty() )
+                    .on( 'change', function () {
+                        var val = $.fn.dataTable.util.escapeRegex(
+                            $(this).val()
+                        );
+ 
+                        column
+                            .search( val ? '^'+val+'$' : '', true, false )
+                            .draw();
+                    } );
+ 
+                column.data().unique().sort().each( function ( d, j ) {
+                    select.append( '<option value="'+d+'">'+d+'</option>' )
+                } );
+            } );
+        },
+
+
         "language": {
             "url": "static/DataTables/Russian.json"
         },
@@ -168,6 +246,7 @@ $(document).ready(function() {
    keys: {
         columns: ':not(:last-child)'
     },
+
     buttons: true,
 
 // Пример замены в тблице поля на ссылку          
@@ -236,10 +315,11 @@ $(document).ready(function() {
                 exportOptions: {
                         columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
                 }
-        }
+        },
 
 ]
   }); //DataTable
+
 
 
 // Открыть модальную форму добавления записи

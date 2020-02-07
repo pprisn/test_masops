@@ -1,4 +1,11 @@
-﻿.table_blur {
+﻿tfoot input {
+        width: 100%;
+        padding: 3px;
+        box-sizing: border-box;
+    }
+
+
+.table_blur {
   background: #f5ffff;
   border-collapse: collapse;
   text-align: left;

@@ -1,9 +1,9 @@
 
 {
-"Title": "Заголовок страници",
+"Title": "Monitoring MASOPS",
 "H2": "Мониторинг версий ПО МАС ОПС УФПС Липецкой обл.",
 "BtnInsert": "&#9997;ДОБАВИТЬ НОВУЮ ЗАПИСЬ В ЖУРНАЛ",
-"Hcsv": "ID;Time;Name;StatusNSI;Statussdo;Statusupd;Statusauth;Statustrans",
+"Hcsv": "ID;Time;Name;StatusNSI;Statussdo;Statusupd;Statusauth;Statustrans;Note",
 "Tabheader": [
  {"id": "Id"},
  {"updated": "Время обновления"},
@@ -13,6 +13,7 @@
  {"statusupd": "Russian Post EAS Configuration"},
  {"statusauth": "Russian Post EAS user"},
  {"statustrans": "Russian Post EAS trans"},
+ {"statustrans": "Примечание"},
  {"th": ""}
  ],
  "Tabtd": [
@@ -23,10 +24,11 @@
  {"statussdo": "Statussdo"},
  {"statusupd": "Statusupd"},
  {"statusauth": "Statusauth"},
- {"statustrans": "Statustrans"}
+ {"statustrans": "Statustrans"},
+ {"note": "Note"}
  ],
  "TitleFormCreate": "Добавление новой записи для мониторинга",
  "TitleFormEdit": "Редактирование записи",
- "Columns": "[0, 1 ,2, 3, 4, 5, 6, 7]",
- "Cntcolumns": 7
+ "Columns": "[0, 1 ,2, 3, 4, 5, 6, 8]",
+ "Cntcolumns": 8
  }
