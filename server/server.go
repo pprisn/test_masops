@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"flag"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
+	//	u "github.com/pprisn/test_masops/server/utils"
 	"html/template"
 	"log"
 	"net/http"
@@ -17,19 +19,18 @@ import (
 )
 
 type Nsi struct {
-	ID          uint
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   *time.Time
-	Name        string
-	Status      string //:7502 RussianPostEASnsi
-	Statussdo   string //:7522 RussianPostEASsdo
-	Statusupd   string //:7500 RussianPostEASConfiguration
-	Statusauth  string //:7501 RussianpostEASuser
-	Statustrans string //:7524 RussianpostEAStruns
-	Note string //Примечание
-
-
+	ID          uint       `json:"ID"`
+	CreatedAt   time.Time  `json:"CreatedAt"`
+	UpdatedAt   time.Time  `json:"UpdatedAt"`
+	DeletedAt   *time.Time `json:"DeletedAt"`
+	Name        string     `json:"Name"`
+	Status      string     `json:"Status"`      //:7502 RussianPostEASnsi
+	Statussdo   string     `json:"Statussdo"`   //:7522 RussianPostEASsdo
+	Statusupd   string     `json:"Statusupd"`   //:7500 RussianPostEASConfiguration
+	Statusauth  string     `json:"Statusauth"`  //:7501 RussianpostEASuser
+	Statustrans string     `json:"Statustrans"` //:7524 RussianpostEAStruns
+	Note        string     `json:"Note"`        //Примечание
+	Ufpsid      string     `-`
 }
 
 var database *sql.DB
@@ -115,7 +116,13 @@ func MCreateHandler(w http.ResponseWriter, r *http.Request) {
 		statusauth := r.FormValue("statusauth")
 		statustrans := r.FormValue("statustrans")
 		note := r.FormValue("note")
-		result, err := database.Exec("insert into masops.nsis (name, created_at, updated_at, status, statussdo,statusupd,statusauth,statustrans, note) values (?, NOW(), NOW(), ?, ?, ?, ?, ?, ?)", name, status, statussdo, statusupd, statusauth, statustrans, note)
+		var ufpsid string
+		for _, cookie := range r.Cookies() {
+			if cookie.Name == "myufpsid" {
+				ufpsid = cookie.Value
+			}
+		}
+		result, err := database.Exec("insert into masops.nsis (name, created_at, updated_at, status, statussdo,statusupd,statusauth,statustrans, note,ufpsid) values (?, NOW(), NOW(), ?, ?, ?, ?, ?, ?, ?)", name, status, statussdo, statusupd, statusauth, statustrans, note, ufpsid)
 		if err != nil {
 			//log.Println(err)
 			log.Printf("%s\t%s\t%s\t%s\n", r.RemoteAddr, r.Method, r.URL, err)
@@ -141,6 +148,13 @@ func MEdit(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println(err)
 		}
+		var myufps string
+		for _, cookie := range r.Cookies() {
+			if cookie.Name == "myufpsid" {
+				myufps = cookie.Value
+			}
+		}
+
 		id := r.FormValue("id")
 		status := r.FormValue("status")
 		statussdo := r.FormValue("statussdo")
@@ -150,7 +164,7 @@ func MEdit(w http.ResponseWriter, r *http.Request) {
 		note := r.FormValue("note")
 
 		//	t := time.Now()
-		_, err = database.Exec("update masops.nsis set status=?, statussdo=?, statusupd=?,statusauth=?, statustrans=?, note=?, updated_at= NOW() where id = ?", status, statussdo, statusupd, statusauth, statustrans, note,id)
+		_, err = database.Exec("update masops.nsis set status=?, statussdo=?, statusupd=?,statusauth=?, statustrans=?, note=?, updated_at= NOW() , ufpsid= ? where id = ?", status, statussdo, statusupd, statusauth, statustrans, note, myufps, id)
 
 		if err != nil {
 			log.Printf("%s\t%s\t%s\t%s\n", r.RemoteAddr, r.Method, r.URL, err)
@@ -172,14 +186,20 @@ func DemoHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
-
-	rows, err := database.Query("select * from masops.nsis ")
+	nsis := []Nsi{}
+	//	if r.Method == "POST" {
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(r.Cookies())
+	ufpsid := r.FormValue("myufpsid")
+	rows, err := database.Query("select id,created_at,updated_at,deleted_at,name,status,statussdo,statusupd,statusauth,statustrans,note from masops.nsis where ufpsid = ?", ufpsid)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, http.StatusText(500), 500)
 	}
 	defer rows.Close()
-	nsis := []Nsi{}
 
 	for rows.Next() {
 		p := Nsi{}
@@ -190,6 +210,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		nsis = append(nsis, p)
 	}
+	//	}
 	tmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
 		log.Println(err)
@@ -197,6 +218,51 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = tmpl.Execute(w, nsis)
 	log.Println(err)
+
+}
+
+func DataHandler(w http.ResponseWriter, r *http.Request) {
+	nsis := []Nsi{}
+	//	if r.Method == "POST" {
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(r.Cookies())
+	//	log.Printf("%+v", r)
+	ufpsid := r.FormValue("myufpsid")
+	log.Printf("Запрос данных %+v", ufpsid)
+	rows, err := database.Query("select id,created_at,updated_at,deleted_at,name,status,statussdo,statusupd,statusauth,statustrans,note from masops.nsis where ufpsid = ?", ufpsid)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, http.StatusText(500), 500)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		p := Nsi{}
+		err := rows.Scan(&p.ID, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt, &p.Name, &p.Status, &p.Statussdo, &p.Statusupd, &p.Statusauth, &p.Statustrans, &p.Note)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		nsis = append(nsis, p)
+	}
+	//	}
+
+	jsonString, err := json.Marshal(nsis)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, http.StatusText(500), 500)
+	}
+	//resp := u.Message(true, "Message")
+	//	w.WriteHeader(http.StatusOK)
+	w.Header().Add("Content-Type", "application/json")
+	//	resp["data"] = nsis
+	//	u.Respond(w, resp)
+	//	log.Print(resp)
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(jsonString))
 }
 
 func Middleware(h http.Handler) http.Handler {
@@ -232,13 +298,14 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", IndexHandler)
+	router.HandleFunc("/mydata", DataHandler)
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
-	router.HandleFunc("/create", CreateHandler)
+	//	router.HandleFunc("/create", CreateHandler)
 	router.HandleFunc("/mcreate", MCreateHandler)
 	router.HandleFunc("/medit", MEdit)
 	router.HandleFunc("/demo", DemoHandler)
-	router.HandleFunc("/edit/{id:[0-9]+}", EditPage).Methods("GET")
-	router.HandleFunc("/edit/{id:[0-9]+}", EditHandler).Methods("POST")
+	//	router.HandleFunc("/edit/{id:[0-9]+}", EditPage).Methods("GET")
+	//	router.HandleFunc("/edit/{id:[0-9]+}", EditHandler).Methods("POST")
 
 	router.Use(Middleware)
 

@@ -10,11 +10,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 -->
-     <link rel="stylesheet" href="static/bootstrap-4.3.1-dist/css/bootstrap.min.css">
+     <link rel="stylesheet" href="static/bootstrap-4.3.1-dist/css/bootstrap.min.css"/>
      <script type="text/javascript" src="static/jquery/jquery-3.4.1.min.js"></script>
      <script type="text/javascript" src="static/popper/popper.min.js"></script>
      <script type="text/javascript" src="static/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
-     <link rel="stylesheet" type="text/css" href="static/css/style.css"> 
+     <link rel="stylesheet" type="text/css" href="static/css/style.css"/> 
      <!-- Full local -->
      <link rel="stylesheet" type="text/css" href="static/DataTables/datatables.min.css"/>
      <script type="text/javascript" src="static/DataTables/datatables.min.js"></script>
@@ -22,41 +22,120 @@
     </head>
 
 <body>
-
 <!--
-<div class="container-fluid">
-  <div class="row-fluid">
-    <div class="span2">
-      <!--Sidebar content
-
-<select class="custom-select" multiple>
-  <option selected>Open this select menu</option>
-  <option value="1">R00</option>
-  <option value="2">R01</option>
-  <option value="3">R02</option>
-</select>
-
-    </div>
-
-    <div class="span10">
+<div id="overlay"></div>                   
 -->
-<!--   <div id="overlay"></div><!-- Пoдлoжкa, oднa нa всю стрaницу -->                   
 
+<div class="container-fluid">
+  <div class="row">
+    <div class="col">
+            <!--Sidebar content -->
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>C00</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R00</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R01</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R02</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R03</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R04</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R05</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R06</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R07</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R08</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R09</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R10</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R11</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R12</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R13</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R14</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R15</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R16</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R17</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R18</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R19</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R21</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R22</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R23</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R24</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R25</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R26</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R27</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R28</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R29</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R30</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R31</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R32</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R33</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R34</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R35</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R36</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R37</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R38</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R39</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R40</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R41</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R42</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R43</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R44</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R45</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R46</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R48</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R49</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R50</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R51</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R52</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R53</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R54</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R55</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R56</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R57</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R58</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R59</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R60</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R61</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R62</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R63</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R64</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R65</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R67</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R68</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R69</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R70</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R71</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R72</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R73</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R74</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R75</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R76</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R77</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R78</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R79</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R83</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R86</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R87</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R89</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R95</botton>
+            <button type='button' class='ufpsbtn btn btn-outline-info btn-sm' aria-pressed='true'>R96</botton>
+
+    </div> <!-- col-->
+  </div> <!-- row -->
+  <div class="row">
+    <div class="col">
       <!--Body content-->
         <h2 class="text-primary" >Мониторинг версий ПО МАС ОПС УФПС Липецкой обл.</h2>
-        <!-- <p><a href="/create">Добавить</a></p> -->
         <!--        <p><a href="/demo">Демо</a></p> -->
-<!--
-        <p><a href="#modal1" class="open_modal">Добавить</a></p>
--->
-       <p> <button type="button" class="btn btn-light" data-toggle="modal" data-target="#insertModal" 
+        <p> <button type="button" class="btn btn-light" data-toggle="modal" data-target="#insertModal"
                 data-whatever="@Какието данные">&#9997;ДОБАВИТЬ НОВУЮ ЗАПИСЬ В ЖУРНАЛ</button> </p>
 
        <table id="myTable" class="cell-border compact stripe  buttons"> <!-- responsive -->
             <thead><th>Id</th><th>Время обновления</th><th>Имя</th><th>Russian Post EAS nsi</th><th>Russian Post EAS sdo</th>
-                    <th>Russian Post EAS Configuration</th><th>Russian Post EAS user</th><th>Russian Post EAS trans</th><th>Примечание</th><th></th></thead>
-<tbody>
-            {{range . }}
+                    <th>Russian Post EAS Configuration</th>
+                    <th>Russian Post EAS user</th>
+                    <th>Russian Post EAS trans</th>
+                    <th>Примечание</th>
+                    <th></th>
+            </thead>
+<!--            
+        <tbody>
+         {{range . }}
             <tr data-tr-id={{.ID}}>
                 <td class="uid"> {{.ID}}</td>
                 <td>{{.UpdatedAt}}</td>
@@ -68,13 +147,12 @@
                 <td class="ustatustrans"> {{.Statustrans}}</td>
                 <td class="unote"> {{.Note}}</td>
                 <td><a href="#" class="edit_modal" data-toggle="modal" data-target="#editModal">&#9998;</a></td>
-             <!-- <td><a href="/edit/{{.ID}}">Редакт.</a></td>
-                <td><a href="/delet/{{.ID}}">Удалить</a></td>
-             -->
             </tr>
             {{end}}
-</tbody>
-  <tfoot class="text-primary">
+            
+        </tbody>
+-->        
+        <tfoot class="text-primary">
         <tr>
             <th></th>
             <th></th>
@@ -86,8 +164,13 @@
             <th></th>
             <th></th>
         </tr>
-    </tfoot>
-        </table>
+        </tfoot>
+    </table>
+
+    </div> <!-- col -->
+  </div> <!-- row -->
+
+  <!-- </div> -->
 
 <!-- CREATE NEW -->
 <div class="modal fade" id="insertModal" tabindex="-1" role="dialog" aria-labelledby="insertModalLabel" aria-hidden="true">
@@ -183,25 +266,64 @@
     </div>
   </div>
 -->
-    </div>
-  </div>
-</div>
-
-<!--
-
-    </div>
-  </div>
-</div>
--->
+<!--    </div>
+  </div> -->
+</div> <!-- container -->
 
 </body>
 
-
 <script>
+
 $(document).ready(function() {
+var $IDRow;
+var $myufpsid = getCookie("myufpsid");
+//alert(document.cookie); //
+console.log('Найден код УФПС='+$myufpsid);
+//var $fd=[{myufpsid: $myufpsid}];
 
+function eraseCookie(name) {
+    createCookie(name,"",-1);
+}                                                                                                    
+                                                                                                     
+function createCookie(name,value,days) {                                                             
+    if (days) {                                                                                      
+        var date = new Date();                                                                       
+        date.setTime(date.getTime()+(days*24*60*60*1000));                                           
+        var expires = "; expires="+date.toGMTString();                                               
+    }                                                                                                
+    else var expires = "";                                                                           
+    document.cookie = name+"="+value+expires+"; path=/";                                             
+}                                                                                                    
+                                                                                                     
+//function readCookie(name) {                                                                          
+//    var nameEQ = name + "=";                                                                         
+//    var ca = document.cookie.split(';');                                                             
+//    for(var i=0;i < ca.length;i++) {                                                                 
+//        var c = ca[i];                                                                               
+//        while (c.charAt(0)==' ') c = c.substring(1,c.length);                                        
+//        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);                      
+//    }                                                                                                
+//    return null;                                                                                     
+//}
 
-// Setup - add a text input to each header cell
+//Ловим выбор кода УФПС        
+$(".ufpsbtn.btn.btn-outline-info.btn-sm").click(function(event) {                                    
+    var $myufpsid = $(this).text().trim();                                                           
+    eraseCookie("myufpsid");                                                                         
+    createCookie("myufpsid",$myufpsid,1);                                                            
+//    document.cookie = encodeURIComponent("myufpsid") + '=' + encodeURIComponent($myufpsid);        
+//    alert(document.cookie); //                                                                       
+    console.log('Выбран УФПС '+$myufpsid);                   
+});                                                                                                  
+        
+// возвращает куки с указанным name,
+// или undefined, если ничего не найдено
+function getCookie(name) {
+  let matches = document.cookie.match(new RegExp(
+    "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+  ));
+  return matches ? decodeURIComponent(matches[1]) : undefined;
+}
 
  // Setup - add a text input to each footer cell
     $('#myTable tfoot th').each( function () {
@@ -209,10 +331,52 @@ $(document).ready(function() {
         $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
     } );
 
-  
+  //var rowData = row.data();
   // DataTable
   var table = $('#myTable').DataTable({
+   "processing": true,
+   "serverSide": true,
+   "language": {
+     "url": "static/DataTables/Russian.json"
+    },
+   "lengthMenu": [[20,25,50, -1], [20,25, 50, "All"]],
+    ajax: {
+        url: 'mydata?myufpsid='+$myufpsid,
+         "type": "POST",
 
+      "dataSrc": function (json) {
+      var return_data = new Array();
+      for(var i=0;i< json.length; i++){
+        return_data.push({
+          'ID': json[i].ID,
+          'UpdatedAt': json[i].UpdatedAt,
+          'Name': json[i].Name,
+          'Status': json[i].Status,
+          'Statussdo': json[i].Statussdo,
+          'Statusupd': json[i].Statusupd,
+          'Statusauth': json[i].Statusauth,
+          'Statustrans': json[i].Statustrans,
+          'Note': json[i].Note,
+          'Fedit': '<a href="#" class="edit_modall" data-toggle="modal" data-target="#editModal" data-tr-id ="'+json[i].ID+'">&#9998;</a>'     
+        })
+      }
+      return return_data;
+    }
+    },
+rowId: 'ID',
+columns: [
+        { title: 'ID', data: 'ID', className: 'id' },
+        { title: 'Время обновления', data: 'UpdatedAt', className: 'updatedat' },
+        { title: 'Имя', data: 'Name' , className: 'name'},
+        { title: 'Post EAS nsi', data: 'Status' , className: 'status'},
+        { title: 'Post EAS sdo', data: 'Statussdo', className: 'statussdo'},
+        { title: 'Post EAS Configuration', data: 'Statusupd', className: 'statusupd' },
+        { title: 'Post EAS user', data: 'Statusauth' , className: 'statusauth'},
+        { title: 'Post EAS trans', data: 'Statustrans', className: 'statustrans' },
+        { title: 'Примечание', data: 'Note', className: 'note' },
+        { title: '#' ,         data: 'Fedit'}
+
+    ],
    initComplete: function () {
             this.api().columns().every( function () {
                 var column = this;
@@ -222,23 +386,18 @@ $(document).ready(function() {
                         var val = $.fn.dataTable.util.escapeRegex(
                             $(this).val()
                         );
- 
+
                         column
                             .search( val ? '^'+val+'$' : '', true, false )
                             .draw();
                     } );
- 
+
                 column.data().unique().sort().each( function ( d, j ) {
                     select.append( '<option value="'+d+'">'+d+'</option>' )
                 } );
             } );
         },
 
-
-        "language": {
-            "url": "static/DataTables/Russian.json"
-        },
-          "lengthMenu":[[20,25,50, -1], [20,25, 50, "All"]],
   // "dom": 'Blfrtip', // только пагинация
   // "dom": '<"top"i>rt<"bottom"flp><"clear">',
     dom: 'B<"clear">lfrtip', // all buttons
@@ -270,12 +429,12 @@ $(document).ready(function() {
                 },
                 //Function which customize the CSV (input : csv is the object that you can preprocesss)
                 customize: function (csv) {
-                        //Split the csv to get the rows
+                        //Split the csv to get the row
                         var split_csv = csv.split("\n");
- 
+
                         //Remove the row one to personnalize the headers
                         split_csv[0] = '"ID";"Time";"Name";"StatusNSI";"Statussdo";"Statusupd";"Statusauth";"Statustrans";"Note"';
- 
+
                         //For each row except the first one (header)
                         $.each(split_csv.slice(1), function (index, csv_row) {
                                 //Split on quotes and comma to get each cell
@@ -320,7 +479,10 @@ $(document).ready(function() {
 ]
   }); //DataTable
 
-
+//$('#myTable').on( 'click', 'tr', function () {
+//    $IDRow = table.row( this ).id();
+////  alert( 'Clicked row id '+$IDRow);
+//});
 
 // Открыть модальную форму добавления записи
 $('#insertModal').on('show.bs.modal', function (event) {
@@ -356,23 +518,27 @@ $("#SaveInsertModal").click(function(event) {
      } //if method
   });
 
+
+//$('#myTable').on( 'click', 'tr', function () {
+//    $IDRow = table.row( this ).id();
+//  alert( 'Clicked row id '+$IDRow);
+//});
+
 // Выбрана ссылка "Редактировать" на записи 
-$('.edit_modal').click(function(event) {
+$('#myTable').on('click','.edit_modall',function(event) {
  	event.preventDefault();// вырубaем стaндaртнoе пoведение
  	var $editRow =null;
         //получим значения из таблици
- 	$editRow = $(event.target ).closest( "tr" );
- 	$uid = $editRow.data('tr-id');
- 	$uname = $editRow.children('td.uname').text().trim();
- 	$ustatus = $editRow.children('td.ustatus').text().trim();
-  	$ustatussdo = $editRow.children('td.ustatussdo').text().trim(); 
-   	$ustatusupd = $editRow.children('td.ustatusupd').text().trim();      
-   	$ustatusauth = $editRow.children('td.ustatusauth').text().trim(); 
-   	$ustatustrans = $editRow.children('td.ustatustrans').text().trim(); 
-   	$unote = $editRow.children('td.unote').text().trim(); 
-
-
-    console.log('Edit '+$uid+' '+$uname+' '+$ustatus);
+    $editRow = $(event.target).closest("tr");
+    $uid = $editRow.children('td.id').text().trim();
+ 	$uname = $editRow.children('td.name').text().trim();
+ 	$ustatus = $editRow.children('td.status').text().trim();
+  	$ustatussdo = $editRow.children('td.statussdo').text().trim(); 
+   	$ustatusupd = $editRow.children('td.statusupd').text().trim();     
+   	$ustatusauth = $editRow.children('td.statusauth').text().trim(); 
+   	$ustatustrans = $editRow.children('td.statustrans').text().trim(); 
+   	$unote = $editRow.children('td.note').text().trim(); 
+    //console.log('Edit '+$uid+' '+$uname);
     var $editForm = $('#ajaxEditForm');
         $editForm.find('#edit-id').val($uid);
         $editForm.find('#edit-name').val($uname);

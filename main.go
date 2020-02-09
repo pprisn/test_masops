@@ -22,7 +22,7 @@ import (
 )
 
 var fsrc = flag.String("fsrc", "./fsrc.txt", `Файл с данными адресов для мониторинга отклика работы службы МАСОПС`)
-var mode = flag.String("mode", "l", `Режим логирования отклика службы, l краткий, f полный`)
+var ufps = flag.String("ufps", "R48", `Список ID УФПС на запуск и сканирование`)
 
 /*
 nsi
@@ -40,13 +40,14 @@ http://localhost:7501/v1/
 
 type Nsi struct {
 	gorm.Model
-	Name       string `gorm:"type:varchar(100);unique;not null"`
-	Status     string `gorm:"type:varchar(255)"` //:7502
-	Statussdo  string `gorm:"type:varchar(255)"` //:7522
-	Statusupd  string `gorm:"type:varchar(255)"` //:7500
-	Statusauth string `gorm:"type:varchar(255)"` //:7501
+	Name        string `gorm:"type:varchar(100);unique;not null"`
+	Status      string `gorm:"type:varchar(255)"` //:7502
+	Statussdo   string `gorm:"type:varchar(255)"` //:7522
+	Statusupd   string `gorm:"type:varchar(255)"` //:7500
+	Statusauth  string `gorm:"type:varchar(255)"` //:7501
 	Statustrans string `gorm:"type:varchar(255)"` //:7524
-	Note string `gorm:"type:varchar(255)"` //
+	Note        string `gorm:"type:varchar(255)"` //
+	ufpsid      string `gorm:"type:varchar(32)"`
 }
 
 func main() {
@@ -67,6 +68,8 @@ func main() {
 	flag.Parse()
 	var floger, f *os.File
 
+	listufps := strings.Split(*ufps, ",")
+
 	if floger, err = os.OpenFile("mas.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644); err != nil {
 		panic(err)
 	}
@@ -82,54 +85,58 @@ func main() {
 	}
 	defer f.Close()
 
-	err = check_nsi(db, f)
+	//	err = check_nsi(db, f)
+
 	//return
-//!	scanner := bufio.NewScanner(f)
+	//!	scanner := bufio.NewScanner(f)
 	var nameip string
 	//	d := net.Dialer{Timeout: time.Second * 4}
+	for _, Ufps := range listufps {
+		// Получить выборку
+		rows, err := db.Raw("select id, name from nsis where ufpsid = ?", Ufps).Rows()
+		defer rows.Close()
+		if err != nil {
+			continue
+		}
 
-	// Получить выборку
-	rows, err := db.Raw("select id, name from nsis").Rows()
-	defer rows.Close()
+		var name string
+		var id int
+		//var version string
+		var port string
+		var vStatus7502, vStatus7522, vStatus7500, vStatus7501, vStatus7524 string
 
-	var name string
-	var id int
-	//var version string
-	var port string
-	var vStatus7502, vStatus7522, vStatus7500, vStatus7501 , vStatus7524 string
+		var i int = 0
+		for rows.Next() {
+			i = i + 1
+			rows.Scan(&id, &name)
+			nameip = name
+			vStatus7502, vStatus7522, vStatus7500, vStatus7501, vStatus7524 = "", "", "", "", ""
+			port = "7502"
+			vStatus7502 = checkStatus(i, id, nameip, port)
+			port = "7522"
+			vStatus7522 = checkStatus(i, id, nameip, port)
+			port = "7500"
+			vStatus7500 = checkStatus(i, id, nameip, port)
+			port = "7501"
+			vStatus7501 = checkStatus(i, id, nameip, port)
+			port = "7524"
+			vStatus7524 = checkStatus(i, id, nameip, port)
 
-	var i int = 0
-	for rows.Next() {
-		i = i + 1
-		rows.Scan(&id,&name)
-		nameip = name
-		vStatus7502, vStatus7522, vStatus7500, vStatus7501 , vStatus7524 = "", "", "", "",""
-		port = "7502"
-		vStatus7502 = checkStatus(i, id, nameip, port)
-		port = "7522"
-		vStatus7522 = checkStatus(i, id, nameip, port)
-		port = "7500"
-		vStatus7500 = checkStatus(i, id, nameip, port)
-		port = "7501"
-		vStatus7501 = checkStatus(i, id, nameip, port)
-		port = "7524"
-		vStatus7524 = checkStatus(i, id, nameip, port)
+			//db.Model(&n).Where("name = ?", nameip).Update("status", vStatus).Error()
+			db.Exec("UPDATE nsis SET updated_at=NOW(), status=? , statussdo=? , statusupd=? , statusauth=? , statustrans=? WHERE name = ?", vStatus7502, vStatus7522, vStatus7500, vStatus7501, vStatus7524, nameip)
 
-		//db.Model(&n).Where("name = ?", nameip).Update("status", vStatus).Error()
-		db.Exec("UPDATE nsis SET updated_at=NOW(), status=? , statussdo=? , statusupd=? , statusauth=? , statustrans=? WHERE name = ?", vStatus7502, vStatus7522, vStatus7500, vStatus7501, vStatus7524, nameip)
-
-	}
-
-//!	if err := scanner.Err(); err != nil {
-//!		fmt.Println(os.Stderr, "reading standard input:", err)
-//!	}
+		}
+	} // range ufps
+	//!	if err := scanner.Err(); err != nil {
+	//!		fmt.Println(os.Stderr, "reading standard input:", err)
+	//!	}
 	t1 := time.Now()
 	log.Printf("СТОП. Время выполнения %v сек.\n", t1.Sub(t0))
 
 }
 
 func checkStatus(i int, id int, ip string, port string) string {
-	fmt.Printf("%d\tid=%d\t%s:%s\n", i,id,ip, port)
+	fmt.Printf("%d\tid=%d\t%s:%s\n", i, id, ip, port)
 
 	client := http.Client{
 		Timeout: time.Duration(6 * time.Second),
@@ -167,8 +174,6 @@ func checkStatus(i int, id int, ip string, port string) string {
 	}
 
 }
-
-
 
 //функция читает файл со списком адресов , добавляет новые в БД к имеющимся
 func check_nsi(db *gorm.DB, f *os.File) error {
