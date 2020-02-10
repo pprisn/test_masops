@@ -8,7 +8,7 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
-	//	u "github.com/pprisn/test_masops/server/utils"
+	u "github.com/pprisn/test_masops/server/utils"
 	"html/template"
 	"log"
 	"net/http"
@@ -31,6 +31,11 @@ type Nsi struct {
 	Statustrans string     `json:"Statustrans"` //:7524 RussianpostEAStruns
 	Note        string     `json:"Note"`        //Примечание
 	Ufpsid      string     `-`
+}
+
+type Ufps struct {
+	ID   string `json:"ID"`
+	Name string `json:"Name"`
 }
 
 var database *sql.DB
@@ -265,6 +270,43 @@ func DataHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(jsonString))
 }
 
+func UfpsHandler(w http.ResponseWriter, r *http.Request) {
+	ufps := []Ufps{}
+	ufpsid := ""
+	for _, cookie := range r.Cookies() {
+		if cookie.Name == "myufpsid" {
+			ufpsid = cookie.Value
+			break
+		}
+	}
+
+	rows, err := database.Query("select id, name from masops.ufps where id = ?", ufpsid)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, http.StatusText(500), 500)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		p := Ufps{}
+		err := rows.Scan(&p.ID, &p.Name)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, http.StatusText(500), 500)
+			break
+		}
+		ufps = append(ufps, p)
+		break
+	}
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	resp := u.Message(true, "Message")
+	resp["Name"] = ufps[0].Name
+	log.Print(resp)
+	u.Respond(w, resp)
+
+}
+
 func Middleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Print(r.RemoteAddr, "\t", r.Method, "\t", r.URL)
@@ -299,6 +341,7 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/", IndexHandler)
 	router.HandleFunc("/mydata", DataHandler)
+	router.HandleFunc("/myufps", UfpsHandler)
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
 	//	router.HandleFunc("/create", CreateHandler)
 	router.HandleFunc("/mcreate", MCreateHandler)
