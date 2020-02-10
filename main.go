@@ -77,7 +77,7 @@ func main() {
 
 	log.SetOutput(floger)
 	t0 := time.Now()
-	log.Printf("СТАРТ %v \n", t0)
+	log.Printf("СТАРТ %v %v \n", t0,listufps)
 
 	if f, err = os.Open(*fsrc); err != nil {
 		log.Printf("Error open %s \n", *fsrc)
@@ -131,15 +131,15 @@ func main() {
 	//!		fmt.Println(os.Stderr, "reading standard input:", err)
 	//!	}
 	t1 := time.Now()
-	log.Printf("СТОП. Время выполнения %v сек.\n", t1.Sub(t0))
+	log.Printf("СТОП. Время выполнения %v сек., %v\n", t1.Sub(t0), listufps)
 
 }
 
 func checkStatus(i int, id int, ip string, port string) string {
-	fmt.Printf("%d\tid=%d\t%s:%s\n", i, id, ip, port)
+//	fmt.Printf("%d\tid=%d\t%s:%s\n", i, id, ip, port)
 
 	client := http.Client{
-		Timeout: time.Duration(6 * time.Second),
+		Timeout: time.Duration(5 * time.Second),
 	}
 
 	resp, err := client.Get("http://" + ip + ".main.russianpost.ru" + ":" + port + "/v1")
@@ -155,7 +155,7 @@ func checkStatus(i int, id int, ip string, port string) string {
 	var status, version string = "", ""
 
 	var dat map[string]interface{}
-	fmt.Printf("%s", body)
+//	fmt.Printf("%s", body)
 	if err := json.Unmarshal(body, &dat); err != nil {
 		return "Error Unmarshal"
 	} else {
@@ -167,7 +167,7 @@ func checkStatus(i int, id int, ip string, port string) string {
 		version = fmt.Sprintf("%s", dat["version"])
 		status = fmt.Sprintf("%s", dat["status"])
 
-		log.Printf("%s\t%s\t%s\n", ip, status, version)
+//		log.Printf("%s\t%s\t%s\n", ip, status, version)
 		//n.Status = fmt.Sprintf("\t%s\t%s", status, version)
 		vStatus := fmt.Sprintf("\t%s\t%s", status, version)
 		return vStatus
@@ -184,7 +184,7 @@ func check_nsi(db *gorm.DB, f *os.File) error {
 	log.Println("func check_nsi")
 	for scanner.Scan() {
 		nameip = strings.TrimSpace(fmt.Sprintf("%s", scanner.Text()))
-		log.Printf("scanner %s\n", nameip)
+//		log.Printf("scanner %s\n", nameip)
 		// Наполним справочник данными из входящего файла
 		n = Nsi{}
 		newNsi := &Nsi{
@@ -195,7 +195,7 @@ func check_nsi(db *gorm.DB, f *os.File) error {
 			// error handling...
 			if gorm.IsRecordNotFoundError(err) {
 				db.Create(newNsi) // newNsi not nsi
-				log.Printf("NewRecord %s\n", nameip)
+//				log.Printf("NewRecord %s\n", nameip)
 			}
 		} else {
 			//db.Model(&n).Where("id = ?", nameip).Update("status", "newrecord")
