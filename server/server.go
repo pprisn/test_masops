@@ -279,6 +279,15 @@ func UfpsHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
+	if ufpsid == "" {
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		resp := u.Message(false, "Message")
+		resp["Name"] = ""
+		log.Print(resp)
+		u.Respond(w, resp)
+		return
+	}
 
 	rows, err := database.Query("select id, name from masops.ufps where id = ?", ufpsid)
 	if err != nil {
@@ -304,7 +313,6 @@ func UfpsHandler(w http.ResponseWriter, r *http.Request) {
 	resp["Name"] = ufps[0].Name
 	log.Print(resp)
 	u.Respond(w, resp)
-
 }
 
 func Middleware(h http.Handler) http.Handler {
