@@ -1,6 +1,6 @@
-//Программа сбора данных версий МАСОПС на сети УФПС Липецкой области
-//http://localhost:7502/v1/
-// Читаем отклик службы и результат сохраняем в БД
+// Программа сбора данных версий МАСОПС на сети c 
+// применением алгоритма конкурентного  программирования !
+// Читаем отклик служб и результат сохраняем в БД
 package main
 
 import (
@@ -16,7 +16,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	//	"sync"
+	"strconv"
+	"sync"
 	"time"
 
 	//         _ "github.com/mattn/go-sqlite3"
@@ -25,7 +26,7 @@ import (
 )
 
 var fsrc = flag.String("fsrc", "./fsrc.txt", `Файл с данными адресов для мониторинга отклика работы службы МАСОПС`)
-var mode = flag.String("mode", "l", `Режим логирования отклика службы, l краткий, f полный`)
+var ufps = flag.String("ufps", "R48", `Список ID УФПС на запуск и сканирование`)
 
 /*
 nsi
@@ -50,9 +51,42 @@ type Nsi struct {
 	Statusauth  string `gorm:"type:varchar(255)"` //:7501
 	Statustrans string `gorm:"type:varchar(255)"` //:7524
 	Note        string `gorm:"type:varchar(255)"`
+	ufpsid      string `gorm:"type:varchar(32)"`
+}
+
+
+var (
+	wg sync.WaitGroup
+)
+
+
+//структура для хранения результатов
+type words struct {
+	sync.Mutex //добавить в структуру мьютекс
+	found      map[string]string
+}
+
+//Инициализация области памяти
+func newWords() *words {
+	return &words{found: map[string]string{}}
+}
+
+//Фиксируем вхождение слова
+func (w *words) add(word string, WS string) {
+	w.Lock()         //Заблокировать объект
+	defer w.Unlock() // По завершению, разблокировать
+	WorkStatus, ok := w.found[word]
+	if !ok { //т.е. если ID запроса не найдено заводим новый элемент слайса
+		w.found[word] = WS
+		return
+	}
+	// слово найдено в очередной раз , увеличим счетчик у элемента слайса
+	w.found[word] = WorkStatus + " ; " + WS
 }
 
 func main() {
+	//Создание структуры хранения результатов
+	w := newWords()
 
 	//	var err error
 	loging := os.Getenv("LOGDB")
@@ -70,6 +104,8 @@ func main() {
 	flag.Parse()
 	var floger, f *os.File
 
+	listufps := strings.Split(*ufps, ",")
+
 	if floger, err = os.OpenFile("mas.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644); err != nil {
 		panic(err)
 	}
@@ -77,7 +113,7 @@ func main() {
 
 	log.SetOutput(floger)
 	t0 := time.Now()
-	log.Printf("СТАРТ %v \n", t0)
+	log.Printf("СТАРТ %v %v \n", t0, listufps)
 
 	if f, err = os.Open(*fsrc); err != nil {
 		log.Printf("Error open %s \n", *fsrc)
@@ -85,100 +121,141 @@ func main() {
 	}
 	defer f.Close()
 
-	err = check_nsi(db, f)
-	//return
-	//!	scanner := bufio.NewScanner(f)
-	var nameip string
-	//	d := net.Dialer{Timeout: time.Second * 4}
-
-	// Получить выборку
-	rows, err := db.Raw("select id, name from nsis").Rows()
-	defer rows.Close()
-
+	ports := [5]string{"7502", "7522", "7500", "7501", "7524"}
+        var id int
+        var idstr string
 	var name string
-	var id int
-	//var version string
-	var port string
-	var vStatus7502, vStatus7522, vStatus7500, vStatus7501, vStatus7524 string
+	
 
-	var i int = 0
-	for rows.Next() {
-		i = i + 1
-		rows.Scan(&id, &name)
-		wg.Add(1)
-		go func(id int, name string) {
-			// Создание контекста с ограничением времени его жизни в 4 сек
-			ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
-			defer cancel()
+	//	d := net.Dialer{Timeout: time.Second * 4}
+	for _, Ufps := range listufps {
+                fmt.Printf("Ufps = %s", Ufps)
+		// Получить выборку
+		rows, err := db.Raw("select id, name from nsis where ufpsid = ?", Ufps).Rows()
+		defer rows.Close()
+		if err != nil {
+			continue
+		}
+		for rows.Next() {
+			rows.Scan(&id, &name)
+                        idstr = strconv.Itoa(id)
+                        fmt.Printf("idstr = %s , name = %s ", idstr, name)
 
-			go work(ctx, id, w)
-			wg.Wait()
-		}(id, name)
+			//var vStatus7502, vStatus7522, vStatus7500, vStatus7501, vStatus7524 string
+			for _, port := range ports {
+				wg.Add(1)
+				go func(idstr string, name string, port string) {
+					// Создание контекста с ограничением времени его жизни в 4 сек
+					ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+					defer cancel()
+					go checkStatus(ctx, idstr, name, port, w)
+					wg.Wait()
+				}(idstr, name, port)
 
-		nameip = name
-		vStatus7502, vStatus7522, vStatus7500, vStatus7501, vStatus7524 = "", "", "", "", ""
-		port = "7502"
-		vStatus7502 = checkStatus(i, id, nameip, port)
-		port = "7522"
-		vStatus7522 = checkStatus(i, id, nameip, port)
-		port = "7500"
-		vStatus7500 = checkStatus(i, id, nameip, port)
-		port = "7501"
-		vStatus7501 = checkStatus(i, id, nameip, port)
-		port = "7524"
-		vStatus7524 = checkStatus(i, id, nameip, port)
+				//		nameip = name
+				//		vStatus7502, vStatus7522, vStatus7500, vStatus7501, vStatus7524 = "", "", "", "", ""
+				//		port = "7502"
+				//		vStatus7502 = checkStatus(i, id, nameip, port)
+				//		port = "7522"
+				//		vStatus7522 = checkStatus(i, id, nameip, port)
+				//		port = "7500"
+				//		vStatus7500 = checkStatus(i, id, nameip, port)
+				//		port = "7501"
+				//		vStatus7501 = checkStatus(i, id, nameip, port)
+				//		port = "7524"
+				//		vStatus7524 = checkStatus(i, id, nameip, port)
+				//		//db.Model(&n).Where("name = ?", nameip).Update("status", vStatus).Error()
+				//		db.Exec("UPDATE nsis SET updated_at=NOW(), status=? , statussdo=? , statusupd=? , statusauth=? , statustrans=? WHERE name = ?", vStatus7502, vStatus7522, vStatus7500, vStatus7501, vStatus7524, nameip)
 
-		//db.Model(&n).Where("name = ?", nameip).Update("status", vStatus).Error()
-		db.Exec("UPDATE nsis SET updated_at=NOW(), status=? , statussdo=? , statusupd=? , statusauth=? , statustrans=? WHERE name = ?", vStatus7502, vStatus7522, vStatus7500, vStatus7501, vStatus7524, nameip)
+			}
+		}
+
+		//!	if err := scanner.Err(); err != nil {
+		//!		fmt.Println(os.Stderr, "reading standard input:", err)
+		//!	}
+		t1 := time.Now()
+		log.Printf("СТОП. Время выполнения %v сек.\n", t1.Sub(t0))
 
 	}
-
-	//!	if err := scanner.Err(); err != nil {
-	//!		fmt.Println(os.Stderr, "reading standard input:", err)
-	//!	}
-	t1 := time.Now()
-	log.Printf("СТОП. Время выполнения %v сек.\n", t1.Sub(t0))
-
 }
+func checkStatus(ctx context.Context, id string, ip string, port string, dict *words) error {
+	fmt.Printf("go id=%s\t%s:%s\n", id, ip, port)
+	defer wg.Done()
+	//Формируем структуру заголовков запроса
+	tr := &http.Transport{}
 
-func checkStatus(i int, id int, ip string, port string) string {
-	fmt.Printf("%d\tid=%d\t%s:%s\n", i, id, ip, port)
+	client := &http.Client{Transport: tr, Timeout: time.Duration(4 * time.Second)}
 
-	client := http.Client{
-		Timeout: time.Duration(6 * time.Second),
-	}
+	// канал для распаковки данных anonymous struct to pack and unpack data in the channel
+	c := make(chan struct {
+		r   *http.Response
+		err error
+	}, 1)
+	req, _ := http.NewRequest("GET", "http://"+ip+".main.russianpost.ru"+":"+port+"/v1", nil)
+	vStatus := ""
+	go func() {
+		resp, err := client.Do(req)
+		fmt.Printf("Doing http request, %s \n", id)
+		//Добавим запись в результат статусов выполнения запросов
+		//dict.add(id, "StartWork")
+		//Добавим запись в результат статусов выполнения запросов
+		//dict.add(id, "StartWork")
+		//пишем в канал данные ответа сервера или ошибку
+		pack := struct {
+			r   *http.Response
+			err error
+		}{resp, err}
+		c <- pack
+	}()
+	// Кто первый того и тапки...
+	select {
+	case <-ctx.Done():
+		tr.CancelRequest(req)
+		<-c // Wait for client.Do
+		fmt.Printf("Cancel context, НЕ ДОЖДАЛИСЬ ОТВЕТА СЕРВЕРА на запрос %s\n", id)
+		//Добавим результат выполнения запроса со статусом CancelContext
+		dict.add(id, "CancelContext")
 
-	resp, err := client.Get("http://" + ip + ".main.russianpost.ru" + ":" + port + "/v1")
-	if err != nil {
-		return "Error response" + ":" + port
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+		return ctx.Err()
+	case ok := <-c:
+		err := ok.err
+		resp_ := ok.r
 
-	if err != nil {
-		return "Error Read conn"
-	}
-	var status, version string = "", ""
+		if err != nil {
+			vStatus = "Error response" + ":" + port
+		} else {
+			defer resp_.Body.Close()
+			body, err := ioutil.ReadAll(resp_.Body)
+			if err != nil {
+				vStatus = "Error Read conn"
+			} else {
+				var status, version string = "", ""
+				var dat map[string]interface{}
+				fmt.Printf("%s", body)
+				if err := json.Unmarshal(body, &dat); err != nil {
+					vStatus = "Error Unmarshal"
+				} else {
 
-	var dat map[string]interface{}
-	fmt.Printf("%s", body)
-	if err := json.Unmarshal(body, &dat); err != nil {
-		return "Error Unmarshal"
-	} else {
+					version = fmt.Sprintf("%s", dat["version"])
+					status = fmt.Sprintf("%s", dat["status"])
 
-		version = fmt.Sprintf("%s", dat["version"])
-		status = fmt.Sprintf("%s", dat["status"])
+					//fmt.Println(dat)
+					version = fmt.Sprintf("%s", dat["version"])
+					status = fmt.Sprintf("%s", dat["status"])
 
-		//fmt.Println(dat)
-		version = fmt.Sprintf("%s", dat["version"])
-		status = fmt.Sprintf("%s", dat["status"])
+					log.Printf("%s\t%s\t%s\n", ip, status, version)
+					//n.Status = fmt.Sprintf("\t%s\t%s", status, version)
+					vStatus = fmt.Sprintf("\t%s\t%s", status, version)
+				}
+			}
+		}
+		//Добавим результат выполнения запроса Ответ сервера
+                key := id+";"+port
+		dict.add( key, vStatus)
+		fmt.Printf("Server Response %s;%s  [%s]\n", id, port, vStatus)
+	} //select
 
-		log.Printf("%s\t%s\t%s\n", ip, status, version)
-		//n.Status = fmt.Sprintf("\t%s\t%s", status, version)
-		vStatus := fmt.Sprintf("\t%s\t%s", status, version)
-		return vStatus
-	}
-
+	return nil
 }
 
 // work() - функция выполнения запроса и получения результата.
@@ -224,7 +301,6 @@ func work(ctx context.Context, id string, dict *words) error {
 		fmt.Printf("Cancel context, НЕ ДОЖДАЛИСЬ ОТВЕТА СЕРВЕРА на запрос %s\n", id)
 		//Добавим результат выполнения запроса со статусом CancelContext
 		dict.add(id, "CancelContext")
-
 		return ctx.Err()
 	case ok := <-c:
 		err := ok.err
@@ -236,7 +312,6 @@ func work(ctx context.Context, id string, dict *words) error {
 		defer resp_.Body.Close()
 		out, _ := ioutil.ReadAll(resp_.Body)
 		fmt.Printf("Server Response %s:  [%s]\n", id, out)
-
 		//Добавим результат выполнения запроса Ответ сервера
 		dict.add(id, string(out))
 
