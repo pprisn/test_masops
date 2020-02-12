@@ -140,13 +140,11 @@ func main() {
 			rows.Scan(&id, &name)
                         idstr = strconv.Itoa(id)
                         fmt.Printf("idstr = %s , name = %s ", idstr, name)
-
-			//var vStatus7502, vStatus7522, vStatus7500, vStatus7501, vStatus7524 string
 			for _, port := range ports {
 				wg.Add(1)
 				go func(idstr string, name string, port string) {
 					// Создание контекста с ограничением времени его жизни в 4 сек
-					ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+					ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
 					defer cancel()
 					go checkStatus(ctx, idstr, name, port, w)
 					wg.Wait()
@@ -170,21 +168,18 @@ func main() {
 			}
 		}
 
-		//!	if err := scanner.Err(); err != nil {
-		//!		fmt.Println(os.Stderr, "reading standard input:", err)
-		//!	}
 		t1 := time.Now()
 		log.Printf("СТОП. Время выполнения %v сек.\n", t1.Sub(t0))
 
 	}
 }
 func checkStatus(ctx context.Context, id string, ip string, port string, dict *words) error {
-	fmt.Printf("go id=%s\t%s:%s\n", id, ip, port)
+	//fmt.Printf("go id=%s\t%s:%s\n", id, ip, port)
 	defer wg.Done()
 	//Формируем структуру заголовков запроса
 	tr := &http.Transport{}
 
-	client := &http.Client{Transport: tr, Timeout: time.Duration(4 * time.Second)}
+	client := &http.Client{Transport: tr, Timeout: time.Duration(5 * time.Second)}
 
 	// канал для распаковки данных anonymous struct to pack and unpack data in the channel
 	c := make(chan struct {
@@ -242,9 +237,7 @@ func checkStatus(ctx context.Context, id string, ip string, port string, dict *w
 					//fmt.Println(dat)
 					version = fmt.Sprintf("%s", dat["version"])
 					status = fmt.Sprintf("%s", dat["status"])
-
-					log.Printf("%s\t%s\t%s\n", ip, status, version)
-					//n.Status = fmt.Sprintf("\t%s\t%s", status, version)
+					//log.Printf("%s\t%s:%s\t%s\t%s\n", id,ip, port, status, version)
 					vStatus = fmt.Sprintf("\t%s\t%s", status, version)
 				}
 			}
@@ -252,6 +245,7 @@ func checkStatus(ctx context.Context, id string, ip string, port string, dict *w
 		//Добавим результат выполнения запроса Ответ сервера
                 key := id+";"+port
 		dict.add( key, vStatus)
+                log.Printf("%s\t%s:%s\t%s\n", id,ip, port, vStatus)
 		fmt.Printf("Server Response %s;%s  [%s]\n", id, port, vStatus)
 	} //select
 
