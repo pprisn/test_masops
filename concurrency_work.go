@@ -1,4 +1,4 @@
-// Программа сбора данных версий МАСОПС на сети c 
+// Программа сбора данных версий МАСОПС на сети c
 // применением алгоритма конкурентного  программирования !
 // Читаем отклик служб и результат сохраняем в БД
 package main
@@ -15,8 +15,8 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -54,11 +54,9 @@ type Nsi struct {
 	ufpsid      string `gorm:"type:varchar(32)"`
 }
 
-
 var (
 	wg sync.WaitGroup
 )
-
 
 //структура для хранения результатов
 type words struct {
@@ -122,29 +120,31 @@ func main() {
 	defer f.Close()
 
 	ports := [5]string{"7502", "7522", "7500", "7501", "7524"}
-        var id int
-        var idstr string
+	var id int
+	var idstr string
 	var name string
-	
 
 	//	d := net.Dialer{Timeout: time.Second * 4}
 	for _, Ufps := range listufps {
-                fmt.Printf("Ufps = %s", Ufps)
+		fmt.Printf("Ufps = %s", Ufps)
 		// Получить выборку
 		rows, err := db.Raw("select id, name from nsis where ufpsid = ?", Ufps).Rows()
 		defer rows.Close()
 		if err != nil {
 			continue
 		}
+		i := 0
 		for rows.Next() {
+			i = i + 1
 			rows.Scan(&id, &name)
-                        idstr = strconv.Itoa(id)
-                        fmt.Printf("idstr = %s , name = %s ", idstr, name)
+			idstr = strconv.Itoa(id)
+			fmt.Printf("Scan nsis i= %d  id = %s , name = %s \n", i, idstr, name)
 			for _, port := range ports {
 				wg.Add(1)
+				time.Sleep(50 * time.Microsecond)
 				go func(idstr string, name string, port string) {
 					// Создание контекста с ограничением времени его жизни в 4 сек
-					ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
+					ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 					defer cancel()
 					go checkStatus(ctx, idstr, name, port, w)
 					wg.Wait()
@@ -178,8 +178,7 @@ func checkStatus(ctx context.Context, id string, ip string, port string, dict *w
 	defer wg.Done()
 	//Формируем структуру заголовков запроса
 	tr := &http.Transport{}
-
-	client := &http.Client{Transport: tr, Timeout: time.Duration(5 * time.Second)}
+	client := &http.Client{Transport: tr, Timeout: time.Duration(4 * time.Second)}
 
 	// канал для распаковки данных anonymous struct to pack and unpack data in the channel
 	c := make(chan struct {
@@ -207,10 +206,13 @@ func checkStatus(ctx context.Context, id string, ip string, port string, dict *w
 	case <-ctx.Done():
 		tr.CancelRequest(req)
 		<-c // Wait for client.Do
-		fmt.Printf("Cancel context, НЕ ДОЖДАЛИСЬ ОТВЕТА СЕРВЕРА на запрос %s\n", id)
+		//fmt.Printf("Cancel context, НЕ ДОЖДАЛИСЬ ОТВЕТА СЕРВЕРА на запрос %s\n", id)
 		//Добавим результат выполнения запроса со статусом CancelContext
-		dict.add(id, "CancelContext")
-
+		key := id + ";" + port
+		vStatus = "Error cancel context" + ":" + port
+		dict.add(key, vStatus)
+		log.Printf("%s\t%s:%s\t%s\n", id, ip, port, vStatus)
+		fmt.Printf("Server Response %s;%s  [%s]\n", id, port, vStatus)
 		return ctx.Err()
 	case ok := <-c:
 		err := ok.err
@@ -226,14 +228,12 @@ func checkStatus(ctx context.Context, id string, ip string, port string, dict *w
 			} else {
 				var status, version string = "", ""
 				var dat map[string]interface{}
-				fmt.Printf("%s", body)
+				// fmt.Printf("%s", body)
 				if err := json.Unmarshal(body, &dat); err != nil {
 					vStatus = "Error Unmarshal"
 				} else {
-
 					version = fmt.Sprintf("%s", dat["version"])
 					status = fmt.Sprintf("%s", dat["status"])
-
 					//fmt.Println(dat)
 					version = fmt.Sprintf("%s", dat["version"])
 					status = fmt.Sprintf("%s", dat["status"])
@@ -243,9 +243,9 @@ func checkStatus(ctx context.Context, id string, ip string, port string, dict *w
 			}
 		}
 		//Добавим результат выполнения запроса Ответ сервера
-                key := id+";"+port
-		dict.add( key, vStatus)
-                log.Printf("%s\t%s:%s\t%s\n", id,ip, port, vStatus)
+		key := id + ";" + port
+		dict.add(key, vStatus)
+		log.Printf("%s\t%s:%s\t%s\n", id, ip, port, vStatus)
 		fmt.Printf("Server Response %s;%s  [%s]\n", id, port, vStatus)
 	} //select
 
