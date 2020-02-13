@@ -15,7 +15,8 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
+	//"strconv"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -25,7 +26,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
-var fsrc = flag.String("fsrc", "./fsrc.txt", `Файл с данными адресов для мониторинга отклика работы службы МАСОПС`)
+//var fsrc = flag.String("fsrc", "./fsrc.txt", `Файл с данными адресов для мониторинга отклика работы службы МАСОПС`)
 var ufps = flag.String("ufps", "R48", `Список ID УФПС на запуск и сканирование`)
 
 /*
@@ -54,20 +55,34 @@ type Nsi struct {
 	ufpsid      string `gorm:"type:varchar(32)"`
 }
 
+func jsElement(port string) string {
+	if "7502" == port {
+		return "\"Status\":\""
+	} else if "7522" == port {
+		return "\"Statussdo\":\""
+	} else if "7500" == port {
+		return "\"Statusupd\":\""
+	} else if "7501" == port {
+		return "\"Statusauth\":\""
+	} else if "7524" == port {
+		return "\"Statustrans\":\""
+	}
+	return "0"
+}
 
 //структура для хранения результатов
 type words struct {
 	sync.Mutex //добавить в структуру мьютекс
-	found      map[string]string
+	found      map[int]string
 }
 
 //Инициализация области памяти
 func newWords() *words {
-	return &words{found: map[string]string{}}
+	return &words{found: map[int]string{}}
 }
 
 //Фиксируем вхождение слова
-func (w *words) add(word string, WS string) {
+func (w *words) add(word int, WS string) {
 	w.Lock()         //Заблокировать объект
 	defer w.Unlock() // По завершению, разблокировать
 	WorkStatus, ok := w.found[word]
@@ -76,7 +91,7 @@ func (w *words) add(word string, WS string) {
 		return
 	}
 	// слово найдено в очередной раз , увеличим счетчик у элемента слайса
-	w.found[word] = WorkStatus + " ; " + WS
+	w.found[word] = WorkStatus + "," + WS
 }
 
 var (
@@ -84,6 +99,7 @@ var (
 )
 
 func main() {
+	var wg2 sync.WaitGroup
 
 	//Создание структуры хранения результатов
 	w := newWords()
@@ -102,7 +118,8 @@ func main() {
 	db.AutoMigrate(&Nsi{})
 
 	flag.Parse()
-	var floger, f *os.File
+	//var floger, f *os.File
+	var floger *os.File
 
 	listufps := strings.Split(*ufps, ",")
 
@@ -114,19 +131,16 @@ func main() {
 	log.SetOutput(floger)
 	t0 := time.Now()
 	log.Printf("СТАРТ %v %v \n", t0, listufps)
-
-	if f, err = os.Open(*fsrc); err != nil {
-		log.Printf("Error open %s \n", *fsrc)
-		panic(err)
-	}
-	defer f.Close()
+	///////////////////////////////////////////////////
+	//	if f, err = os.Open(*fsrc); err != nil {
+	//		log.Printf("Error open %s \n", *fsrc)
+	//		panic(err)
+	//	}
+	//	defer f.Close()
 
 	ports := [5]string{"7502", "7522", "7500", "7501", "7524"}
 	var id int
-	var idstr string
 	var name string
-
-	//	d := net.Dialer{Timeout: time.Second * 4}
 	for _, Ufps := range listufps {
 		fmt.Printf("Ufps = %s", Ufps)
 		// Получить выборку
@@ -139,123 +153,125 @@ func main() {
 		for rows.Next() {
 			i = i + 1
 			rows.Scan(&id, &name)
-			idstr = strconv.Itoa(id)
-			fmt.Printf("Scan nsis i= %d  id = %s , name = %s \n", i, idstr, name)
-			time.Sleep(6000 * time.Microsecond) //new
+			//		idstr = strconv.Itoa(id)
+			//			fmt.Printf("Scan nsis i= %d  id = %s , name = %s \n", i, id, name)
 			for _, port := range ports {
-				wg.Add(1)
-                                //wg.Add(1)
-                                //wg.Add(1)
-				time.Sleep(37000 * time.Microsecond) //Влияет на 25000 полноту сбора данных (нивелирует действия defer
-				go func(idstr string, name string, port string) {
-                                        defer wg.Done() //!new
+				wg2.Add(1) //!required
+				go func(id int, name string, port string) {
+					defer wg2.Done() //!required
 					// Создание контекста с ограничением времени его жизни в 5 сек
-					ctx, cancel := context.WithTimeout(context.Background(), 7*time.Second)
+					ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 					defer cancel()
-                                        wg.Add(1) //new !.!
-						go checkStatus(ctx, idstr, name, port, w)
-					wg.Wait()
-				}(idstr, name, port)
+					wg2.Add(1) //!required
+					go checkStatus(ctx, id, name, port, w, &wg2)
+					time.Sleep(5050 * time.Millisecond) //!reuired more then timeout
+				}(id, name, port)
 
-				//		nameip = name
-				//		vStatus7502, vStatus7522, vStatus7500, vStatus7501, vStatus7524 = "", "", "", "", ""
-				//		port = "7502"
-				//		vStatus7502 = checkStatus(i, id, nameip, port)
-				//		port = "7522"
-				//		vStatus7522 = checkStatus(i, id, nameip, port)
-				//		port = "7500"
-				//		vStatus7500 = checkStatus(i, id, nameip, port)
-				//		port = "7501"
-				//		vStatus7501 = checkStatus(i, id, nameip, port)
-				//		port = "7524"
-				//		vStatus7524 = checkStatus(i, id, nameip, port)
-				//		//db.Model(&n).Where("name = ?", nameip).Update("status", vStatus).Error()
-				//		db.Exec("UPDATE nsis SET updated_at=NOW(), status=? , statussdo=? , statusupd=? , statusauth=? , statustrans=? WHERE name = ?", vStatus7502, vStatus7522, vStatus7500, vStatus7501, vStatus7524, nameip)
-       			}
+			}
 		}
-                wg.Wait() //!new
-		time.Sleep(5500000 * time.Microsecond)
-		t1 := time.Now()
-		log.Printf("СТОП. Время выполнения %v сек.\n", t1.Sub(t0))
-
 	}
+	wg2.Wait() //!required
+
+	// To store the keys in slice in sorted order
+	var keys []int
+	for k, _ := range w.found {
+		keys = append(keys, k)
+	}
+	sort.Ints(keys)
+
+	// To perform the opertion you want
+	for _, k := range keys {
+		fmt.Println("Key:", k, "Value:", w.found[k])
+		var dat map[string]interface{}
+		err := json.Unmarshal([]byte("{"+w.found[k]+"}"), &dat)
+		if err != nil {
+			fmt.Printf("%d - ErrorUnmarshal \n", k)
+			fmt.Println("{" + w.found[k] + "}")
+			continue
+		} else {
+			//		db.Exec("UPDATE nsis SET updated_at=NOW(), status=? , statussdo=? , statusupd=? , statusauth=? , statustrans=? WHERE id = ?",
+			//			dat["Status"], dat["Statussdo"], dat["Statusupd"], dat["Statusauth"], dat["Statustrans"], k)
+
+			fmt.Printf("ID= %d Status %s;%s;%s;%s;%s\n", k, dat["Status"], dat["Statussdo"], dat["Statusupd"], dat["Statusauth"], dat["Statustrans"])
+		}
+	}
+	//	for key, value := range w.found {
+	//		fmt.Println(key, "\t", value)
+	//	}
+
+	t1 := time.Now()
+	log.Printf("СТОП. Время выполнения %v сек.\n", t1.Sub(t0))
+
 }
-func checkStatus(ctx context.Context, id string, ip string, port string, dict *words) error {
-	defer wg.Done() //!new
+func checkStatus(ctx context.Context, id int, ip string, port string, dict *words, wg2 *sync.WaitGroup) error {
+	defer wg2.Done() //!required
 	//Формируем структуру заголовков запроса ожидаем отклик до 4 сек
 	tr := &http.Transport{}
-	client := &http.Client{Transport: tr, Timeout: time.Duration(5 * time.Second)} 
-
+	//client := &http.Client{Transport: tr, Timeout: time.Duration(4 * time.Second)}
+	client := &http.Client{Transport: tr}
 	// канал для распаковки данных anonymous struct to pack and unpack data in the channel
 	c := make(chan struct {
 		r   *http.Response
 		err error
 	}, 1)
+	defer close(c)
 	req, _ := http.NewRequest("GET", "http://"+ip+".main.russianpost.ru"+":"+port+"/v1", nil)
+	req.WithContext(ctx)
 	vStatus := ""
-	wg.Add(1) //!new
+	wg2.Add(1) //!required
 	go func() {
-          defer wg.Done() //!new
+		defer wg2.Done() //!required
 		resp, err := client.Do(req)
-		fmt.Printf("Doing http request, %s \n", id)
-		//dict.add(id, "StartWork")
+		//fmt.Printf("Doing http request, %s \n", id)
 		//пишем в канал данные ответа сервера или ошибку
 		pack := struct {
 			r   *http.Response
 			err error
 		}{resp, err}
 		c <- pack
- 	        //wg.Wait() //!
 	}()
 	// Кто первый того и тапки...
-       //wg.Wait() //!
 	select {
 	case <-ctx.Done():
 		tr.CancelRequest(req)
 		<-c // Wait for client.Do
 		//fmt.Printf("Cancel context, НЕ ДОЖДАЛИСЬ ОТВЕТА СЕРВЕРА на запрос %s\n", id)
 		//Добавим результат выполнения запроса со статусом CancelContext
-		key := id + ";" + port
-		vStatus = "Error cancel context" + ":" + port
-		dict.add(key, vStatus)
-		log.Printf("%s\t%s:%s\t%s\n", id, ip, port, vStatus)
-		fmt.Printf("Server Response %s;%s  [%s]\n", id, port, vStatus)
+		//key := id + ";" + port
+		vStatus = jsElement(port) + "Error cancel context" + ":" + port + "\""
+		dict.add(id, vStatus)
+		log.Printf("%d\t%s:%s\t%s\n", id, ip, port, vStatus)
+		//!		fmt.Printf("Server Response %d;%s  [%s]\n", id, port, vStatus)
 		return ctx.Err()
 	case ok := <-c:
 		err := ok.err
 		resp_ := ok.r
 		if err != nil {
-			vStatus = "Error response" + ":" + port
+			vStatus = jsElement(port) + "Error response" + ":" + port + "\""
 		} else {
 			defer resp_.Body.Close()
 			body, err := ioutil.ReadAll(resp_.Body)
 			if err != nil {
-				vStatus = "Error Read conn"
+				vStatus = jsElement(port) + "Error Read conn" + "\""
 			} else {
 				var status, version string = "", ""
 				var dat map[string]interface{}
 				// fmt.Printf("%s", body)
 				err := json.Unmarshal(body, &dat)
 				if err != nil {
-					vStatus = "Error Unmarshal"
+					vStatus = jsElement(port) + "Error Unmarshal" + "\""
 				} else {
 					version = fmt.Sprintf("%s", dat["version"])
 					status = fmt.Sprintf("%s", dat["status"])
-					//fmt.Println(dat)
-					//version = fmt.Sprintf("%s", dat["version"])
-					//status = fmt.Sprintf("%s", dat["status"])
-					//log.Printf("%s\t%s:%s\t%s\t%s\n", id,ip, port, status, version)
-					vStatus = fmt.Sprintf("\t%s\t%s", status, version)
+					vStatus = jsElement(port) + fmt.Sprintf("%s\t%s", strings.TrimSpace(status), strings.TrimSpace(version)) + "\""
 				}
 			}
 		}
 		//Добавим результат выполнения запроса Ответ сервера
-		key := id + ";" + port
-		dict.add(key, vStatus)
-		log.Printf("%s\t%s:%s\t%s\n", id, ip, port, vStatus)
-		fmt.Printf("Server Response %s;%s  [%s]\n", id, port, vStatus)
+		dict.add(id, vStatus)
+		log.Printf("%d\t%s:%s\t%s\n", id, ip, port, vStatus)
+		//!		fmt.Printf("Server Response ID=%d port=%s Status=%s\n", id, port, vStatus)
 	} //select
-
 	return nil
 }
 
@@ -267,59 +283,6 @@ func checkStatus(ctx context.Context, id string, ip string, port string, dict *w
 // ctx context.Context - контекст запроса
 // id string идентификатор запроса
 // dict *words - указатель на структуру хранения результатов выполнения запросов
-func work(ctx context.Context, id string, dict *words) error {
-	defer wg.Done()
-	//Формируем структуру заголовков запроса
-	tr := &http.Transport{}
-	client := &http.Client{Transport: tr}
-
-	// канал для распаковки данных anonymous struct to pack and unpack data in the channel
-	c := make(chan struct {
-		r   *http.Response
-		err error
-	}, 1)
-
-	req, _ := http.NewRequest("GET", "http://localhost:1111", nil)
-	go func() {
-		resp, err := client.Do(req)
-		fmt.Printf("Doing http request, %s \n", id)
-
-		//Добавим запись в результат статусов выполнения запросов
-		dict.add(id, "StartWork")
-
-		pack := struct {
-			r   *http.Response
-			err error
-		}{resp, err}
-		c <- pack
-	}()
-
-	// Кто первый того и тапки...
-	select {
-	case <-ctx.Done():
-		tr.CancelRequest(req)
-		<-c // Wait for client.Do
-		fmt.Printf("Cancel context, НЕ ДОЖДАЛИСЬ ОТВЕТА СЕРВЕРА на запрос %s\n", id)
-		//Добавим результат выполнения запроса со статусом CancelContext
-		dict.add(id, "CancelContext")
-		return ctx.Err()
-	case ok := <-c:
-		err := ok.err
-		resp_ := ok.r
-		if err != nil {
-			fmt.Println("Error ", err)
-			return err
-		}
-		defer resp_.Body.Close()
-		out, _ := ioutil.ReadAll(resp_.Body)
-		fmt.Printf("Server Response %s:  [%s]\n", id, out)
-		//Добавим результат выполнения запроса Ответ сервера
-		dict.add(id, string(out))
-
-	}
-
-	return nil
-}
 
 //функция читает файл со списком адресов , добавляет новые в БД к имеющимся
 func check_nsi(db *gorm.DB, f *os.File) error {

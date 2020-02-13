@@ -1,5 +1,5 @@
 //Небольшое приложение для параллельного выполнения группы запросов и получения результатов
-//http-запросы к серверу в обычном порядке, если сервер работает медленно, мы игнорируем (отменяем) запрос 
+//http-запросы к серверу в обычном порядке, если сервер работает медленно, мы игнорируем (отменяем) запрос
 //и выполняем быстрый возврат, чтобы мы могли управлять отменой и освободить соединение.
 
 package main
@@ -21,19 +21,17 @@ var (
 //структура для хранения результатов
 type words struct {
 	sync.Mutex //добавить в структуру мьютекс
-	found map[string]string
+	found      map[string]string
 }
 
-
 //Инициализация области памяти
-func newWords() *words { 
+func newWords() *words {
 	return &words{found: map[string]string{}}
-    }
-
+}
 
 //Фиксируем вхождение слова
-func (w *words) add(word string, WS string){
-	w.Lock()        //Заблокировать объект
+func (w *words) add(word string, WS string) {
+	w.Lock()         //Заблокировать объект
 	defer w.Unlock() // По завершению, разблокировать
 	WorkStatus, ok := w.found[word]
 	if !ok { //т.е. если ID запроса не найдено заводим новый элемент слайса
@@ -41,35 +39,36 @@ func (w *words) add(word string, WS string){
 		return
 	}
 	// слово найдено в очередной раз , увеличим счетчик у элемента слайса
-	w.found[word] = WorkStatus +" ; "+WS
+	w.found[word] = WorkStatus + " ; " + WS
 }
 
-// main 
+// main
 func main() {
-        //Создание структуры хранения результатов
+	//Создание структуры хранения результатов
 	w := newWords()
-        for now := range time.Tick( 1 * time.Second) {
-          //Запускаем параллельные work 
-          for i:=0; i<= 10; i++ {
-		wg.Add(1)
-		go func(i int, now string) {
-			// Создание контекста с ограничением времени его жизни в 4 сек
-			ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
-			defer cancel()
-			id := fmt.Sprintf("ID:%d-%s",i,now)
-			go work(ctx, id, w )
-			wg.Wait()
-		}(i, fmt.Sprintf("%v",now))
-	  }
+	for now := range time.Tick(1 * time.Second) {
+		//Запускаем параллельные work
+		for i := 0; i <= 10; i++ {
+			wg.Add(1)
+			go func(i int, now string) {
+				// Создание контекста с ограничением времени его жизни в 4 сек
+				ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
+				defer cancel()
+				id := fmt.Sprintf("ID:%d-%s", i, now)
+				go work(ctx, id, w)
+				time.Sleep(5 * time.Second)
+			}(i, fmt.Sprintf("%v", now))
+		}
 	}
+	wg.Wait()
 	fmt.Println("Finished.")
 }
 
 // work() - функция выполнения запроса и получения результата.
-// Результатом работы является запись в структуру значения ID-идентификатора запроса 
-// и результата ответа сервера или 
+// Результатом работы является запись в структуру значения ID-идентификатора запроса
+// и результата ответа сервера или
 // статус прерывания работы при достижении ограничения времени жизни контекста запроса
-// Параметры: 
+// Параметры:
 // ctx context.Context - контекст запроса
 // id string идентификатор запроса
 // dict *words - указатель на структуру хранения результатов выполнения запросов
@@ -88,10 +87,10 @@ func work(ctx context.Context, id string, dict *words) error {
 	req, _ := http.NewRequest("GET", "http://localhost:1111", nil)
 	go func() {
 		resp, err := client.Do(req)
-		fmt.Printf("Doing http request, %s \n",id)
-              
-              //Добавим запись в результат статусов выполнения запросов
-               dict.add(id,"StartWork")
+		fmt.Printf("Doing http request, %s \n", id)
+
+		//Добавим запись в результат статусов выполнения запросов
+		dict.add(id, "StartWork")
 
 		pack := struct {
 			r   *http.Response
@@ -99,15 +98,15 @@ func work(ctx context.Context, id string, dict *words) error {
 		}{resp, err}
 		c <- pack
 	}()
-	
-        // Кто первый того и тапки...	
+
+	// Кто первый того и тапки...
 	select {
 	case <-ctx.Done():
 		tr.CancelRequest(req)
 		<-c // Wait for client.Do
-		fmt.Printf("Cancel context, НЕ ДОЖДАЛИСЬ ОТВЕТА СЕРВЕРА на запрос %s\n",id)
-              //Добавим результат выполнения запроса со статусом CancelContext
-               dict.add( id,"CancelContext")
+		fmt.Printf("Cancel context, НЕ ДОЖДАЛИСЬ ОТВЕТА СЕРВЕРА на запрос %s\n", id)
+		//Добавим результат выполнения запроса со статусом CancelContext
+		dict.add(id, "CancelContext")
 
 		return ctx.Err()
 	case ok := <-c:
@@ -119,12 +118,12 @@ func work(ctx context.Context, id string, dict *words) error {
 		}
 		defer resp_.Body.Close()
 		out, _ := ioutil.ReadAll(resp_.Body)
-		fmt.Printf("Server Response %s:  [%s]\n", id,out)
+		fmt.Printf("Server Response %s:  [%s]\n", id, out)
 
-              //Добавим результат выполнения запроса Ответ сервера
-               dict.add(id, string(out))
+		//Добавим результат выполнения запроса Ответ сервера
+		dict.add(id, string(out))
 
 	}
-    
+
 	return nil
 }
