@@ -54,9 +54,6 @@ type Nsi struct {
 	ufpsid      string `gorm:"type:varchar(32)"`
 }
 
-var (
-	wg sync.WaitGroup
-)
 
 //структура для хранения результатов
 type words struct {
@@ -82,7 +79,12 @@ func (w *words) add(word string, WS string) {
 	w.found[word] = WorkStatus + " ; " + WS
 }
 
+var (
+	wg sync.WaitGroup
+)
+
 func main() {
+
 	//Создание структуры хранения результатов
 	w := newWords()
 
@@ -139,14 +141,19 @@ func main() {
 			rows.Scan(&id, &name)
 			idstr = strconv.Itoa(id)
 			fmt.Printf("Scan nsis i= %d  id = %s , name = %s \n", i, idstr, name)
+			time.Sleep(6000 * time.Microsecond) //new
 			for _, port := range ports {
 				wg.Add(1)
-				time.Sleep(50 * time.Microsecond)
+                                //wg.Add(1)
+                                //wg.Add(1)
+				time.Sleep(37000 * time.Microsecond) //Влияет на 25000 полноту сбора данных (нивелирует действия defer
 				go func(idstr string, name string, port string) {
-					// Создание контекста с ограничением времени его жизни в 4 сек
-					ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+                                        defer wg.Done() //!new
+					// Создание контекста с ограничением времени его жизни в 5 сек
+					ctx, cancel := context.WithTimeout(context.Background(), 7*time.Second)
 					defer cancel()
-					go checkStatus(ctx, idstr, name, port, w)
+                                        wg.Add(1) //new !.!
+						go checkStatus(ctx, idstr, name, port, w)
 					wg.Wait()
 				}(idstr, name, port)
 
@@ -164,21 +171,20 @@ func main() {
 				//		vStatus7524 = checkStatus(i, id, nameip, port)
 				//		//db.Model(&n).Where("name = ?", nameip).Update("status", vStatus).Error()
 				//		db.Exec("UPDATE nsis SET updated_at=NOW(), status=? , statussdo=? , statusupd=? , statusauth=? , statustrans=? WHERE name = ?", vStatus7502, vStatus7522, vStatus7500, vStatus7501, vStatus7524, nameip)
-
-			}
+       			}
 		}
-
+                wg.Wait() //!new
+		time.Sleep(5500000 * time.Microsecond)
 		t1 := time.Now()
 		log.Printf("СТОП. Время выполнения %v сек.\n", t1.Sub(t0))
 
 	}
 }
 func checkStatus(ctx context.Context, id string, ip string, port string, dict *words) error {
-	//fmt.Printf("go id=%s\t%s:%s\n", id, ip, port)
-	defer wg.Done()
-	//Формируем структуру заголовков запроса
+	defer wg.Done() //!new
+	//Формируем структуру заголовков запроса ожидаем отклик до 4 сек
 	tr := &http.Transport{}
-	client := &http.Client{Transport: tr, Timeout: time.Duration(4 * time.Second)}
+	client := &http.Client{Transport: tr, Timeout: time.Duration(5 * time.Second)} 
 
 	// канал для распаковки данных anonymous struct to pack and unpack data in the channel
 	c := make(chan struct {
@@ -187,12 +193,11 @@ func checkStatus(ctx context.Context, id string, ip string, port string, dict *w
 	}, 1)
 	req, _ := http.NewRequest("GET", "http://"+ip+".main.russianpost.ru"+":"+port+"/v1", nil)
 	vStatus := ""
+	wg.Add(1) //!new
 	go func() {
+          defer wg.Done() //!new
 		resp, err := client.Do(req)
 		fmt.Printf("Doing http request, %s \n", id)
-		//Добавим запись в результат статусов выполнения запросов
-		//dict.add(id, "StartWork")
-		//Добавим запись в результат статусов выполнения запросов
 		//dict.add(id, "StartWork")
 		//пишем в канал данные ответа сервера или ошибку
 		pack := struct {
@@ -200,8 +205,10 @@ func checkStatus(ctx context.Context, id string, ip string, port string, dict *w
 			err error
 		}{resp, err}
 		c <- pack
+ 	        //wg.Wait() //!
 	}()
 	// Кто первый того и тапки...
+       //wg.Wait() //!
 	select {
 	case <-ctx.Done():
 		tr.CancelRequest(req)
@@ -217,7 +224,6 @@ func checkStatus(ctx context.Context, id string, ip string, port string, dict *w
 	case ok := <-c:
 		err := ok.err
 		resp_ := ok.r
-
 		if err != nil {
 			vStatus = "Error response" + ":" + port
 		} else {
@@ -229,14 +235,15 @@ func checkStatus(ctx context.Context, id string, ip string, port string, dict *w
 				var status, version string = "", ""
 				var dat map[string]interface{}
 				// fmt.Printf("%s", body)
-				if err := json.Unmarshal(body, &dat); err != nil {
+				err := json.Unmarshal(body, &dat)
+				if err != nil {
 					vStatus = "Error Unmarshal"
 				} else {
 					version = fmt.Sprintf("%s", dat["version"])
 					status = fmt.Sprintf("%s", dat["status"])
 					//fmt.Println(dat)
-					version = fmt.Sprintf("%s", dat["version"])
-					status = fmt.Sprintf("%s", dat["status"])
+					//version = fmt.Sprintf("%s", dat["version"])
+					//status = fmt.Sprintf("%s", dat["status"])
 					//log.Printf("%s\t%s:%s\t%s\t%s\n", id,ip, port, status, version)
 					vStatus = fmt.Sprintf("\t%s\t%s", status, version)
 				}
