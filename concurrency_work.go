@@ -207,8 +207,8 @@ func checkStatus(ctx context.Context, id int, ip string, port string, dict *word
 	defer wg2.Done() //!required
 	//Формируем структуру заголовков запроса ожидаем отклик до 4 сек
 	tr := &http.Transport{}
-	//client := &http.Client{Transport: tr, Timeout: time.Duration(4 * time.Second)}
-	client := &http.Client{Transport: tr}
+	client := &http.Client{Transport: tr, Timeout: time.Duration(5 * time.Second)}
+	//client := &http.Client{Transport: tr}
 	// канал для распаковки данных anonymous struct to pack and unpack data in the channel
 	c := make(chan struct {
 		r   *http.Response
