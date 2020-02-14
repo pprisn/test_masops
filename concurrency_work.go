@@ -28,6 +28,7 @@ import (
 
 //var fsrc = flag.String("fsrc", "./fsrc.txt", `Файл с данными адресов для мониторинга отклика работы службы МАСОПС`)
 var ufps = flag.String("ufps", "R48", `Список ID УФПС на запуск и сканирование`)
+var plog = flag.String("plog", "R48", `Признак логирования. full  полное, по умолчанию минимальное `)
 
 /*
 nsi
@@ -57,15 +58,15 @@ type Nsi struct {
 
 func jsElement(port string) string {
 	if "7502" == port {
-		return "\"Status\":\""
+		return "\"Status\": \""
 	} else if "7522" == port {
-		return "\"Statussdo\":\""
+		return "\"Statussdo\": \""
 	} else if "7500" == port {
-		return "\"Statusupd\":\""
+		return "\"Statusupd\": \""
 	} else if "7501" == port {
-		return "\"Statusauth\":\""
+		return "\"Statusauth\": \""
 	} else if "7524" == port {
-		return "\"Statustrans\":\""
+		return "\"Statustrans\": \""
 	}
 	return "0"
 }
@@ -103,15 +104,13 @@ func main() {
 
 	//Создание структуры хранения результатов
 	w := newWords()
-
 	//	var err error
 	loging := os.Getenv("LOGDB")
 	if loging == "" {
 		loging = "root"
 	}
-	fmt.Printf("LOGDB=%s\n", loging)
-	//	return
-	//db, err := gorm.Open("sqlite3", "masops.db?cache=shared&mode=rwc")
+	//! fmt.Printf("LOGDB=%s\n", loging)
+
 	db, err := gorm.Open("mysql", loging+"@(localhost)/masops?charset=utf8&parseTime=True&loc=Local")
 	defer db.Close()
 
@@ -120,6 +119,7 @@ func main() {
 	flag.Parse()
 	//var floger, f *os.File
 	var floger *os.File
+         
 
 	listufps := strings.Split(*ufps, ",")
 
@@ -142,7 +142,7 @@ func main() {
 	var id int
 	var name string
 	for _, Ufps := range listufps {
-		fmt.Printf("Ufps = %s", Ufps)
+		// fmt.Printf("Ufps = %s", Ufps)
 		// Получить выборку
 		rows, err := db.Raw("select id, name from nsis where ufpsid = ?", Ufps).Rows()
 		defer rows.Close()
@@ -181,18 +181,18 @@ func main() {
 
 	// To perform the opertion you want
 	for _, k := range keys {
-		fmt.Println("Key:", k, "Value:", w.found[k])
+		//! fmt.Println("Key:", k, "Value:", w.found[k])
 		var dat map[string]interface{}
-		err := json.Unmarshal([]byte("{"+w.found[k]+"}"), &dat)
+		err := json.Unmarshal([]byte("{ "+w.found[k]+" }"), &dat)
 		if err != nil {
-			fmt.Printf("%d - ErrorUnmarshal \n", k)
-			fmt.Println("{" + w.found[k] + "}")
+			//!fmt.Printf("ErrorUnmarshal id = %d \t%s\n", k, "{ " + w.found[k] + " }")
 			continue
 		} else {
-			//		db.Exec("UPDATE nsis SET updated_at=NOW(), status=? , statussdo=? , statusupd=? , statusauth=? , statustrans=? WHERE id = ?",
-			//			dat["Status"], dat["Statussdo"], dat["Statusupd"], dat["Statusauth"], dat["Statustrans"], k)
+					db.Exec("UPDATE nsis SET updated_at=NOW(), status=? , statussdo=? , statusupd=? , statusauth=? , statustrans=? WHERE id = ?",
+						dat["Status"], dat["Statussdo"], dat["Statusupd"], dat["Statusauth"], dat["Statustrans"], k)
 
-			fmt.Printf("ID= %d Status %s;%s;%s;%s;%s\n", k, dat["Status"], dat["Statussdo"], dat["Statusupd"], dat["Statusauth"], dat["Statustrans"])
+			//!fmt.Printf("OK   Unmarshal id = %d \t%s\n", k, "{ " + w.found[k] + " }")
+
 		}
 	}
 	//	for key, value := range w.found {
@@ -200,7 +200,7 @@ func main() {
 	//	}
 
 	t1 := time.Now()
-	log.Printf("СТОП. Время выполнения %v сек.\n", t1.Sub(t0))
+	log.Printf("СТОП. Время выполнения %v сек. %v \n", t1.Sub(t0), listufps)
 
 }
 func checkStatus(ctx context.Context, id int, ip string, port string, dict *words, wg2 *sync.WaitGroup) error {
@@ -240,7 +240,9 @@ func checkStatus(ctx context.Context, id int, ip string, port string, dict *word
 		//key := id + ";" + port
 		vStatus = jsElement(port) + "Error cancel context" + ":" + port + "\""
 		dict.add(id, vStatus)
-		log.Printf("%d\t%s:%s\t%s\n", id, ip, port, vStatus)
+		if *plog =="full" {
+			log.Printf("%d\t%s:%s\t%s\n", id, ip, port, vStatus)
+		}
 		//!		fmt.Printf("Server Response %d;%s  [%s]\n", id, port, vStatus)
 		return ctx.Err()
 	case ok := <-c:
@@ -263,13 +265,15 @@ func checkStatus(ctx context.Context, id int, ip string, port string, dict *word
 				} else {
 					version = fmt.Sprintf("%s", dat["version"])
 					status = fmt.Sprintf("%s", dat["status"])
-					vStatus = jsElement(port) + fmt.Sprintf("%s\t%s", strings.TrimSpace(status), strings.TrimSpace(version)) + "\""
+					vStatus = jsElement(port) + fmt.Sprintf("%s %s", strings.TrimSpace(status), strings.TrimSpace(version)) + "\""
 				}
 			}
 		}
 		//Добавим результат выполнения запроса Ответ сервера
 		dict.add(id, vStatus)
-		log.Printf("%d\t%s:%s\t%s\n", id, ip, port, vStatus)
+		if *plog =="full" {
+			log.Printf("%d\t%s:%s\t%s\n", id, ip, port, vStatus)
+		}
 		//!		fmt.Printf("Server Response ID=%d port=%s Status=%s\n", id, port, vStatus)
 	} //select
 	return nil
