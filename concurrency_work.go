@@ -198,11 +198,11 @@ func main() {
 	//	for key, value := range w.found {
 	//		fmt.Println(key, "\t", value)
 	//	}
-
 	t1 := time.Now()
 	log.Printf("СТОП. Время выполнения %v сек. %v \n", t1.Sub(t0), listufps)
-
 }
+
+
 func checkStatus(ctx context.Context, id int, ip string, port string, dict *words, wg2 *sync.WaitGroup) error {
 	defer wg2.Done() //!required
 	//Формируем структуру заголовков запроса ожидаем отклик до 4 сек
