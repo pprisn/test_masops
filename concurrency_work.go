@@ -160,11 +160,11 @@ func main() {
 				go func(id int, name string, port string) {
 					defer wg2.Done() //!required
 					// Создание контекста с ограничением времени его жизни в 5 сек
-					ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+					ctx, cancel := context.WithTimeout(context.Background(), 7*time.Second)
 					defer cancel()
 					wg2.Add(1) //!required
 					go checkStatus(ctx, id, name, port, w, &wg2)
-					time.Sleep(5050 * time.Millisecond) //!reuired more then timeout
+					time.Sleep(8000 * time.Millisecond) //!reuired more then timeout
 				}(id, name, port)
 
 			}
@@ -207,7 +207,7 @@ func checkStatus(ctx context.Context, id int, ip string, port string, dict *word
 	defer wg2.Done() //!required
 	//Формируем структуру заголовков запроса ожидаем отклик до 4 сек
 	tr := &http.Transport{}
-	client := &http.Client{Transport: tr, Timeout: time.Duration(5 * time.Second)}
+	client := &http.Client{Transport: tr, Timeout: time.Duration(6 * time.Second)}
 	//client := &http.Client{Transport: tr}
 	// канал для распаковки данных anonymous struct to pack and unpack data in the channel
 	c := make(chan struct {
