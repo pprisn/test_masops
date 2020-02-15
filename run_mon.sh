@@ -2,87 +2,43 @@
 log=/var/log/concurrency_masops.log
 cd /root/go/src/github.com/pprisn/test_masops/
 export PATH=/usr/local/bin:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin 
-exec ./concurrency_work -ufps C00 &>>$log  & 
-exec ./concurrency_work -ufps R00 &>>$log  & 
-exec ./concurrency_work -ufps R01 &>>$log  & 
-exec ./concurrency_work -ufps R02 &>>$log  & 
-exec ./concurrency_work -ufps R03 &>>$log  & 
-exec ./concurrency_work -ufps R04 &>>$log  & 
-exec ./concurrency_work -ufps R05 &>>$log  & 
-exec ./concurrency_work -ufps R06 &>>$log  & 
-exec ./concurrency_work -ufps R07 &>>$log  & 
-exec ./concurrency_work -ufps R08 &>>$log  & 
-exec ./concurrency_work -ufps R09 &>>$log  & 
-exec ./concurrency_work -ufps R10 &>>$log  & 
-exec ./concurrency_work -ufps R11 &>>$log  & 
-exec ./concurrency_work -ufps R12 &>>$log  & 
-exec ./concurrency_work -ufps R13 &>>$log  & 
-exec ./concurrency_work -ufps R14 &>>$log  & 
-exec ./concurrency_work -ufps R15 &>>$log  & 
-exec ./concurrency_work -ufps R16 &>>$log  & 
-exec ./concurrency_work -ufps R17 &>>$log  & 
-exec ./concurrency_work -ufps R18 &>>$log  & 
-exec ./concurrency_work -ufps R19 &>>$log  & 
-exec ./concurrency_work -ufps R21 &>>$log  & 
-exec ./concurrency_work -ufps R22 &>>$log  & 
-exec ./concurrency_work -ufps R23 &>>$log  & 
-exec ./concurrency_work -ufps R24 &>>$log  & 
-exec ./concurrency_work -ufps R25 &>>$log  & 
-exec ./concurrency_work -ufps R26 &>>$log  & 
-exec ./concurrency_work -ufps R27 &>>$log  & 
-exec ./concurrency_work -ufps R28 &>>$log  & 
-exec ./concurrency_work -ufps R29 &>>$log  & 
-exec ./concurrency_work -ufps R30 &>>$log  & 
-exec ./concurrency_work -ufps R31 &>>$log  & 
-exec ./concurrency_work -ufps R32 &>>$log  & 
-exec ./concurrency_work -ufps R33 &>>$log  & 
-exec ./concurrency_work -ufps R34 &>>$log  & 
-exec ./concurrency_work -ufps R35 &>>$log  & 
-exec ./concurrency_work -ufps R36 &>>$log  & 
-exec ./concurrency_work -ufps R37 &>>$log  & 
-exec ./concurrency_work -ufps R38 &>>$log  & 
-exec ./concurrency_work -ufps R39 &>>$log  & 
-exec ./concurrency_work -ufps R40 &>>$log  & 
-exec ./concurrency_work -ufps R41 &>>$log  & 
-exec ./concurrency_work -ufps R42 &>>$log  & 
-exec ./concurrency_work -ufps R43 &>>$log  & 
-exec ./concurrency_work -ufps R44 &>>$log  & 
-exec ./concurrency_work -ufps R45 &>>$log  & 
-exec ./concurrency_work -ufps R46 &>>$log  & 
-exec ./concurrency_work -ufps R48 &>>$log  & 
-exec ./concurrency_work -ufps R49 &>>$log  & 
-exec ./concurrency_work -ufps R50 &>>$log  & 
-exec ./concurrency_work -ufps R51 &>>$log  & 
-exec ./concurrency_work -ufps R52 &>>$log  & 
-exec ./concurrency_work -ufps R53 &>>$log  & 
-exec ./concurrency_work -ufps R54 &>>$log  & 
-exec ./concurrency_work -ufps R55 &>>$log  & 
-exec ./concurrency_work -ufps R56 &>>$log  & 
-exec ./concurrency_work -ufps R57 &>>$log  & 
-exec ./concurrency_work -ufps R58 &>>$log  & 
-exec ./concurrency_work -ufps R59 &>>$log  & 
-exec ./concurrency_work -ufps R60 &>>$log  & 
-exec ./concurrency_work -ufps R61 &>>$log  & 
-exec ./concurrency_work -ufps R62 &>>$log  & 
-exec ./concurrency_work -ufps R63 &>>$log  & 
-exec ./concurrency_work -ufps R64 &>>$log  & 
-exec ./concurrency_work -ufps R65 &>>$log  & 
-exec ./concurrency_work -ufps R67 &>>$log  & 
-exec ./concurrency_work -ufps R68 &>>$log  & 
-exec ./concurrency_work -ufps R69 &>>$log  & 
-exec ./concurrency_work -ufps R70 &>>$log  & 
-exec ./concurrency_work -ufps R71 &>>$log  & 
-exec ./concurrency_work -ufps R72 &>>$log  & 
-exec ./concurrency_work -ufps R73 &>>$log  & 
-exec ./concurrency_work -ufps R74 &>>$log  & 
-exec ./concurrency_work -ufps R75 &>>$log  & 
-exec ./concurrency_work -ufps R76 &>>$log  & 
-exec ./concurrency_work -ufps R77 &>>$log  & 
-exec ./concurrency_work -ufps R78 &>>$log  & 
-exec ./concurrency_work -ufps R79 &>>$log  & 
-exec ./concurrency_work -ufps R83 &>>$log  & 
-exec ./concurrency_work -ufps R86 &>>$log  & 
-exec ./concurrency_work -ufps R87 &>>$log  & 
-exec ./concurrency_work -ufps R89 &>>$log  & 
-exec ./concurrency_work -ufps R95 &>>$log  & 
-exec ./concurrency_work -ufps R96 &>>$log  & 
+./concurrency_work -ufps C00 
+./concurrency_work -ufps R00 
+./concurrency_work -ufps R01 
+./concurrency_work -ufps R02 
+./concurrency_work -ufps R03 
+./concurrency_work -ufps R04 
+./concurrency_work -ufps R05 
+./concurrency_work -ufps R06 
+./concurrency_work -ufps R07 
+./concurrency_work -ufps R08 
+./concurrency_work -ufps R09 
+./concurrency_work -ufps R10 
+./concurrency_work -ufps R11 
+./concurrency_work -ufps R12 
+./concurrency_work -ufps R13 
+./concurrency_work -ufps R14 
+./concurrency_work -ufps R15 
+./concurrency_work -ufps R16 
+./concurrency_work -ufps R17 
+./concurrency_work -ufps R18 
+./concurrency_work -ufps R19 
+./concurrency_work -ufps R21 
+./concurrency_work -ufps R22 
+./concurrency_work -ufps R23 
+./concurrency_work -ufps R24 
+./concurrency_work -ufps R25 
+./concurrency_work -ufps R26 
+./concurrency_work -ufps R27 
+./concurrency_work -ufps R28 
+./concurrency_work -ufps R29 
+./concurrency_work -ufps R30 
+./concurrency_work -ufps R31 
+./concurrency_work -ufps R32 
+./concurrency_work -ufps R33 
+./concurrency_work -ufps R34 
+./concurrency_work -ufps R35
+./concurrency_work -ufps R36
+./concurrency_work -ufps R37
+./concurrency_work -ufps R38
+./concurrency_work -ufps R39
