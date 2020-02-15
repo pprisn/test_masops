@@ -16,13 +16,12 @@ import (
 	"net/http"
 	"os"
 	//"strconv"
+	"reflect"
 	"sort"
 	"strings"
 	"sync"
 	"time"
 
-	//         _ "github.com/mattn/go-sqlite3"
-	//_ "github.com/jinzhu/gorm/dialects/sqlite"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
@@ -95,9 +94,9 @@ func (w *words) add(word int, WS string) {
 	w.found[word] = WorkStatus + "," + WS
 }
 
-var (
-	wg sync.WaitGroup
-)
+//var (
+//	wg sync.WaitGroup
+//)
 
 func main() {
 	var wg2 sync.WaitGroup
@@ -119,12 +118,13 @@ func main() {
 	flag.Parse()
 	//var floger, f *os.File
 	var floger *os.File
-         
 
 	listufps := strings.Split(*ufps, ",")
 
 	if floger, err = os.OpenFile("mas.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644); err != nil {
-		panic(err)
+		if floger, err = os.OpenFile("mas2.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644); err != nil {
+			panic(err)
+		}
 	}
 	defer floger.Close()
 
@@ -188,8 +188,8 @@ func main() {
 			//!fmt.Printf("ErrorUnmarshal id = %d \t%s\n", k, "{ " + w.found[k] + " }")
 			continue
 		} else {
-					db.Exec("UPDATE nsis SET updated_at=NOW(), status=? , statussdo=? , statusupd=? , statusauth=? , statustrans=? WHERE id = ?",
-						dat["Status"], dat["Statussdo"], dat["Statusupd"], dat["Statusauth"], dat["Statustrans"], k)
+			db.Exec("UPDATE nsis SET updated_at=NOW(), status=? , statussdo=? , statusupd=? , statusauth=? , statustrans=? WHERE id = ?",
+				dat["Status"], dat["Statussdo"], dat["Statusupd"], dat["Statusauth"], dat["Statustrans"], k)
 
 			//!fmt.Printf("OK   Unmarshal id = %d \t%s\n", k, "{ " + w.found[k] + " }")
 
@@ -200,8 +200,9 @@ func main() {
 	//	}
 	t1 := time.Now()
 	log.Printf("СТОП. Время выполнения %v сек. %v \n", t1.Sub(t0), listufps)
-}
+	clear(&w)
 
+}
 
 func checkStatus(ctx context.Context, id int, ip string, port string, dict *words, wg2 *sync.WaitGroup) error {
 	defer wg2.Done() //!required
@@ -240,7 +241,7 @@ func checkStatus(ctx context.Context, id int, ip string, port string, dict *word
 		//key := id + ";" + port
 		vStatus = jsElement(port) + "Error cancel context" + ":" + port + "\""
 		dict.add(id, vStatus)
-		if *plog =="full" {
+		if *plog == "full" {
 			log.Printf("%d\t%s:%s\t%s\n", id, ip, port, vStatus)
 		}
 		//!		fmt.Printf("Server Response %d;%s  [%s]\n", id, port, vStatus)
@@ -271,7 +272,7 @@ func checkStatus(ctx context.Context, id int, ip string, port string, dict *word
 		}
 		//Добавим результат выполнения запроса Ответ сервера
 		dict.add(id, vStatus)
-		if *plog =="full" {
+		if *plog == "full" {
 			log.Printf("%d\t%s:%s\t%s\n", id, ip, port, vStatus)
 		}
 		//!		fmt.Printf("Server Response ID=%d port=%s Status=%s\n", id, port, vStatus)
@@ -318,4 +319,9 @@ func check_nsi(db *gorm.DB, f *os.File) error {
 
 	}
 	return nil
+}
+
+func clear(v interface{}) {
+	p := reflect.ValueOf(v).Elem()
+	p.Set(reflect.Zero(p.Type()))
 }
