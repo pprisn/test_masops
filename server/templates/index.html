@@ -403,7 +403,8 @@ console.log('Найден код УФПС='+$myufpsid);
 
 $.get('myufps', function processData(json){
        if (json.status == true ){
-            $('#Titletop').text('Мониторинг версий сервисов МАС ОПС '+json.Name);
+            $('#Titletop').text('Мониторинг работы сервисов МАС ОПС '+json.Name);
+            $('title').text('Мониторинг работы сервисов МАС ОПС '+json.Name);
        	}
 });
 
@@ -459,7 +460,7 @@ function getCookie(name) {
     } );
 
   //var rowData = row.data();
-  // DataTable
+  // DataTable////////////////////////////////////////////////////////////////////////////////////////////////////////
   var table = $('#myTable').DataTable({
    "processing": true,
 //   "serverSide": true,
@@ -599,22 +600,103 @@ columns: [
 
         {
                 extend: 'excel',
+                //title: "Отчет", 	
                 //Name the EXCEL
-                messageTop: 'Мониторинг версий ПО МАС ОПС УФПС Липецкой обл.',
+                //messageTop: $('#Titletop').text(),
                 filename: 'file_name',
                 text: 'Отчет EXCEL',
                 exportOptions: {
                         columns: [0, 1 ,2, 3, 4, 5, 6, 7, 8]
                 }
+//                customize: function(xlsx){
+//                  var sheet = xlsx.xl.worksheets['sheet1.xml'];
+//                   // $('row:first c', sheet).attr('s', '36');
+//                   var $t = $('#Titletop').text(); 
+//                   $('row c[r="A1"]', sheet).attr('t',$t);
+//                }
+
         },
         {
                 extend: 'pdf',
                 filename: 'file_name',
                 text: 'Отчет PDF',
-                messageTop: 'Мониторинг версий ПО МАС ОПС УФПС Липецкой обл.',
+                messageTop: '#',
+                orientation: 'landscape', //portrait
+				pageSize: 'A4', //A3 , A5 , A6 , legal , letter
                 exportOptions: {
                         columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
-                }
+                },
+					customize: function (doc) {
+						//Remove the title created by datatTables
+						doc.content.splice(0,1);
+						//Create a date string that we use in the footer. Format is dd-mm-yyyy
+						var now = new Date();
+						var jsDate = now.getDate()+'-'+(now.getMonth()+1)+'-'+now.getFullYear();
+						// Set page margins [left,top,right,bottom] or [horizontal,vertical]
+						// or one number for equal spread
+						// It's important to create enough space at the top for a header !!!
+						doc.pageMargins = [20,60,20,30];
+						// Set the font size fot the entire document
+						doc.defaultStyle.fontSize = 7;
+						// Set the fontsize for the table header
+						doc.styles.tableHeader.fontSize = 7;
+						// Create a header object with 3 columns
+						// Left side: Logo
+						// Middle: brandname
+						// Right side: A document title
+						doc['header']=(function() {
+							return {
+								columns: [
+//									{
+//										image: logo,
+//										width: 24
+//									},
+									{
+										alignment: 'left',
+										italics: true,
+										text: 'Отчет:',
+										fontSize: 16,
+										margin: [10,0]
+									},
+									{
+										alignment: 'right',
+										fontSize: 13,
+										text:  $('#Titletop').text()
+									}
+								],
+								margin: 20
+							}
+						});
+						// Create a footer object with 2 columns
+						// Left side: report creation date
+						// Right side: current page and total pages
+						doc['footer']=(function(page, pages) {
+							return {
+								columns: [
+									{
+										alignment: 'left',
+										text: ['Отчт создан: ', { text: jsDate.toString() }]
+									},
+									{
+										alignment: 'right',
+										text: ['страница ', { text: page.toString() },	' из ',	{ text: pages.toString() }]
+									}
+								],
+								margin: 20
+							}
+						});
+						// Change dataTable layout (Table styling)
+						// To use predefined layouts uncomment the line below and comment the custom lines below
+						// doc.content[0].layout = 'lightHorizontalLines'; // noBorders , headerLineOnly
+						var objLayout = {};
+						objLayout['hLineWidth'] = function(i) { return .5; };
+						objLayout['vLineWidth'] = function(i) { return .5; };
+						objLayout['hLineColor'] = function(i) { return '#aaa'; };
+						objLayout['vLineColor'] = function(i) { return '#aaa'; };
+						objLayout['paddingLeft'] = function(i) { return 4; };
+						objLayout['paddingRight'] = function(i) { return 4; };
+						doc.content[0].layout = objLayout;
+                    }
         },
 
 ]
