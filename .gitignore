@@ -1,4 +1,5 @@
 .env
 .ENV
 *.log
+*.dump
 

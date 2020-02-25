@@ -403,8 +403,9 @@ console.log('Найден код УФПС='+$myufpsid);
 
 $.get('myufps', function processData(json){
        if (json.status == true ){
-            $('#Titletop').text('Мониторинг работы сервисов МАС ОПС '+json.Name);
-            $('title').text('Мониторинг работы сервисов МАС ОПС '+json.Name);
+            var $t = 'Мониторинг работы сервисов МАС ОПС '+json.Name;
+            $('#Titletop').text($t);
+            $('title').text($t);
        	}
 });
 
@@ -742,11 +743,6 @@ $("#SaveInsertModal").click(function(event) {
      } //if method
   });
 
-
-//$('#myTable').on( 'click', 'tr', function () {
-//    $IDRow = table.row( this ).id();
-//  alert( 'Clicked row id '+$IDRow);
-//});
 
 // Выбрана ссылка "Редактировать" на записи 
 $('#myTable').on('click','.edit_modall',function(event) {
